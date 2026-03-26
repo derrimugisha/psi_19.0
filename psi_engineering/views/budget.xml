@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+
+    <record model="ir.ui.view" id="crossovered_budget_view_form_inherit">
+        <field name="model">budget.analytic</field>
+        <field name="inherit_id" ref="account_budget.view_budget_analytic_form" />
+        <field name="arch" type="xml">
+
+            <xpath
+                expr="//notebook/page/field[@name='budget_line_ids']/list//field[@name='account_id']"
+                position="after">
+                <field name="project_id" />
+                <field name="product_id" string="Item / Activity" />
+                <field name="description" />                
+            </xpath>
+
+            <xpath expr="//header/button[@name='action_budget_confirm']" position="attributes">
+                <attribute name="groups">psi_engineering.group_md</attribute>
+            </xpath>
+            <xpath expr="//header/button[@name='action_budget_cancel']" position="attributes">
+                <attribute name="groups">psi_engineering.group_md</attribute>
+            </xpath>
+            <xpath expr="//header/button[@name='action_budget_draft']" position="attributes">
+                <attribute name="groups">psi_engineering.group_md</attribute>
+            </xpath>
+            <xpath expr="//header/button[@name='create_revised_budget']" position="attributes">
+                <attribute name="groups">psi_engineering.group_md</attribute>
+            </xpath>
+            <xpath expr="//header/button[@name='action_budget_done']" position="attributes">
+                <attribute name="groups">psi_engineering.group_md</attribute>
+            </xpath>
+           
+            <!-- <xpath expr="//notebook/page/field[@name='budget_line_ids']/list//field[@name='budget_amount']" position="attributes">
+                <attribute name="readonly">1</attribute>
+           </xpath> -->
+
+            <xpath expr="//notebook/page/field[@name='budget_line_ids']/list//field[@name='budget_amount']"
+                position="after">
+                <field name="remaining_amount" />
+                <field name="practical_quantity" optional="hide" />
+                <field name="remaining_quantity" optional="hide" />
+            </xpath>
+            <xpath expr="//notebook/page/field[@name='budget_line_ids']/list//field[@name='budget_amount']"
+                position="before">
+                <field name="quantity" />
+                <field name="unit_price" />
+            </xpath>
+            <xpath expr="//field[@name='budget_line_ids']/list//field[@name='achieved_percentage']"
+                position="replace">
+                <field name="percentage_achieved" widget="percentage" />
+            </xpath>
+
+            <xpath expr="//group/group/field[@name='user_id']" position="after">
+                <field name="project_id" />
+            </xpath>
+
+        </field>
+    </record> 
+
+    <record id="view_budget_line_tree_inherit" model="ir.ui.view">
+        <field name="name">budget_line_tree</field>
+        <field name="model">budget.line</field>
+        <field name="inherit_id" ref="account_budget.view_budget_line_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//list/field[@name='account_id']" position="after">
+                <field name="product_id" optional="show"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- <record id="view_account_analytic_line_form_extended" model="ir.ui.view">
+        <field name="name">analytic.account.analytic.line.form.extended</field>
+        <field name="model">account.analytic.line</field>
+        <field name="inherit_id" ref="analytic.view_account_analytic_line_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group[@name='amount']" position="after">
+                <field name="bill_name" readonly="1"/>
+                <field name="bill_product" readonly="1"/>
+                <field name="bill_quantity" readonly="1"/>
+                <field name="bill_price" readonly="1"/>
+                <field name="bill_amount" readonly="1"/>
+            </xpath>
+        </field>
+    </record> -->
+
+    <record id="timesheet_view_tree_user_extended" model="ir.ui.view">
+        <field name="name">timesheet.view.tree.user.extended</field>
+        <field name="model">account.analytic.line</field>
+        <field name="inherit_id" ref="hr_timesheet.timesheet_view_tree_user"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='date']" position="after">
+                <field name="bill_name"/>
+                <field name="bill_product"/>
+                <field name="bill_quantity"/>
+                <field name="bill_price"/>
+                <field name="bill_amount"/>
+            </xpath>
+        </field>
+    </record>
+    
+
+</odoo>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="ir_cron_check_invoice_due_date" model="ir.cron">
+        <field name="name">Check All Invoices and Bills</field>
+        <field name="model_id" ref="model_account_move" />
+        <field name="state">code</field>
+        <field name="code">model.create_check_due_invoice_date()</field>
+        <field name="user_id" ref="base.user_root" /> 
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="active" eval="True" />
+    </record>
+
+    <record id="cron_weekly_finance_reconciliation" model="ir.cron">
+        <field name="name">Weekly Finance Reconciliation Reminder</field>
+        <field name="model_id" ref="model_account_move"/>
+        <field name="state">code</field>
+        <field name="code">model._send_weekly_finance_reminder()</field>
+        <field name="interval_type">weeks</field>
+        <field name="interval_number">1</field>
+        <field name="nextcall">2024-02-24 09:00:00</field> 
+        <field name="active" eval="True"/>
+    </record>
+
+    <record id="cron_task_milestone_reminder" model="ir.cron">
+        <field name="name">Task Milestone Reminder</field>
+        <field name="model_id" ref="model_project_task"/>
+        <field name="state">code</field>
+        <field name="code">model.send_task_milestone_reminders()</field>
+        <field name="interval_type">days</field>
+        <field name="interval_number">1</field>
+        <field name="active" eval="True"/>
+    </record>
+
+    <record id="ir_cron_duplicate_recurring_invoices" model="ir.cron">
+        <field name="name">Duplicate Recurring Vendor Bills</field>
+        <field name="model_id" ref="model_account_move"/>
+        <field name="state">code</field>
+        <field name="code">model.duplicate_recurring_invoice()</field>
+        <!-- <field name="user_id" ref="base.user_admin"/> -->
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="nextcall">2025-02-25 00:00:00</field>
+        <!-- <field name="numbercall">-1</field> -->
+    </record>
+
+
+</odoo>

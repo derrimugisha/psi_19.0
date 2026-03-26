@@ -1,0 +1,685 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_custom_fleet_vehicle_list" model="ir.ui.view">
+        <field name="name">custom.fleet.vehicle.list</field>
+        <field name="model">custom.fleet.vehicle</field>
+        <field name="arch" type="xml">
+            <list string="Vehicle" decoration-warning="contract_renewal_due_soon and not contract_renewal_overdue" decoration-danger="contract_renewal_overdue" multi_edit="1" sample="1">
+                <field name="active" column_invisible="True" />
+                <field name="license_plate" readonly="1" />
+                <field name="model_id" widget="many2one_avatar" readonly="1" />
+                <field name="category_id" />
+                <field name="service_type" />
+                <field name="driver_id" widget="many2one_avatar" readonly="1" optional="show" />
+                <field name="manager_id" optional="hide" widget="many2one_avatar_user" />
+                <field name="acquisition_date" optional="hide" />
+                <field name="odometer" string="Last Odometer Reading" />
+                <field name="next_service_mileage" />
+                <field name="in_out_state" widget="badge"
+                    decoration-muted="in_out_state in ('draft','checked_out')"
+                    decoration-info="in_out_state == 'checked_in'" />
+            </list>
+        </field>
+    </record>
+
+    <record id="view_custom_fleet_vehicle_form" model="ir.ui.view">
+        <field name="name">custom.fleet.vehicle.form</field>
+        <field name="model">custom.fleet.vehicle</field>
+        <field name="arch" type="xml">
+            <form string="Vehicle" js_class="fleet_form">
+                <field name="service_activity" invisible="1" />
+                <header>
+                    <!-- <button string="Apply New Driver" class="btn btn-primary" type="object" name="action_accept_driver_change" invisible="not future_driver_id"/>
+                    <field name="state_id" widget="statusbar" options="{'clickable': '1'}"/> -->
+                    <button name="create_fuel_requisition" type="object" string="Request For Fuel"
+                        class="btn-primary" />
+
+                    <button name="create_item_request" type="object"
+                        string="Request For Spare Parts" class="btn-primary" />
+
+                    <!-- <button name="create_service_requisition" type="object" string="Request For Servicing" class="btn-primary" />
+                    <button name="create_repair_requisition" type="object" string="Request For Repairs" class="btn-primary" /> -->
+                </header>
+                <sheet>
+                    <field name="company_id" invisible="1" />
+                    <field name="currency_id" invisible="1" />
+                    <field name="country_code" invisible="1" />
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button" type="object" name="open_fuel_requisitions" icon="fa-tint" invisible="fuel_expenses_count &lt; 1" context="{'default_vehicle_id': id}">
+                            <field name="fuel_expenses_value" widget="statinfo"
+                                string="Fuel Requisitions" />
+                            <field name="fuel_expenses_count" invisible="1" />
+                        </button>
+                      
+                        <button class="oe_stat_button" type="object" name="open_service_requisitions" icon="fa-car" invisible="servicing_expenses_count &lt; 1" context="{'default_vehicle_id': id}">
+                            <field name="servicing_expenses_value" widget="statinfo"
+                                string="Service Requisitions" />
+                            <field name="servicing_expenses_count" invisible="1" />
+                        </button>
+                        <button class="oe_stat_button" type="object" name="open_repair_requisitions" icon="fa-wrench" invisible="repair_expenses_count &lt; 1" context="{'default_vehicle_id': id}">
+                            <field name="repair_expenses_value" widget="statinfo"
+                                string="Repairs Requisitions" />
+                            <field name="repair_expenses_count" invisible="1" />
+                        </button>
+                        <button name="open_odometer_logs" type="object" class="oe_stat_button" icon="fa-tachometer" context="{'xml_id':'fleet_vehicle_odometer_action'}" help="show the odometer logs for this vehicle" invisible="vehicle_type != 'car'">
+                            <field name="odometer_logs_count" widget="statinfo" string="Odometer" />
+                        </button>
+
+                        <button class="oe_stat_button" type="object"
+                            invisible="item_requests_count == 0" name="open_item_requisition"
+                            icon="fa-box">
+                            <field string="Item Requisition" name="item_requests_count"
+                                widget="statinfo" />
+                        </button>
+                       
+                        <button name="action_open_analytic_items" type="object" class="oe_stat_button" icon="fa-bar-chart">
+                            <field name="analytic_account_balance" widget="statinfo" string="Analytic Balance"/>
+                        </button>                       
+
+                       
+                    </div>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger"
+                        invisible="active" />
+                    <field name="image_128" widget="image" class="oe_avatar" />
+                    <div class="oe_title">
+                        <label for="model_id" />
+                        <h1>
+                            <field name="model_id" placeholder="e.g. Model S" class="w-100" />
+                        </h1>
+                        <label for="license_plate" />
+                        <h2>
+                            <field name="license_plate" class="oe_inline" placeholder="e.g. PAE 326" />
+                        </h2>
+                    </div>
+                    <!-- <label for="in_out_state" />
+                    <field name="in_out_state" readonly="1" force_save="1" widget="badge"
+                        decoration-muted="in_out_state in ('draft','checked_out')"
+                        decoration-info="in_out_state == 'checked_in'" /> -->
+                    <group col="2">
+                        <group string="Vehicle Assignment">
+                            <field name="active" invisible="1" />
+                            <field name="vehicle_type" invisible="1" />
+                            <field name="driver_id"
+                                domain="['|', ('company_id', '=', False ), ('company_id', '=', company_id)]"
+                                widget="many2one_avatar"
+                                options="{'no_open': True, 'no_create': True}" />
+                            <field name="manager_id"
+                                domain="[('share', '=', False), ('company_id', '=', company_id)]"
+                                widget="many2one_avatar_user"
+                                options="{'no_open': True, 'no_create': True}" />
+                            <field name="service_type" />
+                            <field name="staff_member" invisible="service_type != 'Staff Vehicle'"
+                                options="{'no_open': True, 'no_create': True}" />
+                            
+                            <field name="stock_location"
+                                options="{'no_open': True, 'no_create': True}" />
+                            <field name="analytic_account_id" />
+
+                            <field name="company_id" groups="base.group_multi_company" />
+                        </group>
+                        <group string="Vehicle Maintenance">
+                            <field name="category_id" options="{'no_open': True, 'no_create': True}" />
+                            <field name="acquisition_date" invisible="vehicle_type != 'car'" />
+                            <field name="vin_sn" />
+                            <label for="odometer" invisible="vehicle_type != 'car'" />
+                            <div class="o_row o_hr_narrow_field" invisible="vehicle_type != 'car'">
+                                <field name="odometer" string="Last Odometer Reading" />
+                                <field name="odometer_unit" />
+                            </div>
+                            <field name="location" invisible="1" />
+                            <field name="tom_card_number" />
+                            <field name="next_service_mileage" />
+                        </group>
+                    </group>
+                    <field name="vehicle_properties" columns="2" />
+                    <notebook>
+                        
+                        <page string="Vehicle Model" name="page_model">
+                            <group>
+                                <group string="Model" name="group_model">
+                                    <field name="model_year" />
+                                    <field name="transmission" invisible="vehicle_type != 'car'" />
+                                    <field name="color" />
+                                    <field name="seats" invisible="vehicle_type != 'car'" />
+                                    <field name="doors" invisible="vehicle_type != 'car'" />
+                                    <field name="trailer_hook" invisible="vehicle_type != 'car'" />
+                                    <field name="frame_type" invisible="vehicle_type != 'bike'" />
+                                    <label for="frame_size" invisible="vehicle_type != 'bike'" />
+                                    <div class="o_row" invisible="vehicle_type != 'bike'">
+                                        <field name="frame_size" /><span>cm</span>
+                                    </div>
+                                    <field name="electric_assistance"
+                                        invisible="vehicle_type != 'bike'" />
+                                </group>
+                                <group string="Engine" invisible="vehicle_type != 'car'">
+                                    <field name="power_unit" />
+                                    <label for="power" invisible="power_unit != 'power'" />
+                                    <div class="o_row" invisible="power_unit != 'power'">
+                                        <field name="power" /><span>kW</span>
+                                    </div>
+                                    <field name="horsepower" invisible="power_unit != 'horsepower'" />
+                                    <!-- <label for="vehicle_range"/>
+                                    <div class="o_row">
+                                        <field name="vehicle_range"/><span>km</span>
+                                    </div> -->
+                                    <field name="fuel_type" />
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Notes" name="note">
+                            <field name="description" nolabel="1"
+                                placeholder="Write here any other information related to this vehicle" />
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter />
+            </form>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="cash_requisition_form_extension">
+        <field name="name">Cash Requisition Form Extension</field>
+        <field name="model">cash.request</field>
+        <field name="inherit_id" ref="requisitions.cash_requisition_form" />
+        <field name="arch" type="xml">
+
+            <!-- <xpath expr="//field[@name='amount']" position="after">
+                <field name="paid_journal_id" invisible="not paid_journal_id" readonly="1"
+                    force_save="1" options="{'no_open': True, 'no_create': True}" />
+                <field name="amount_words" invisible="1" />
+                <field name="supervisor_id" readonly="1" />
+                <field name="request_employee_id" invisible="1" />
+            </xpath> -->
+
+            <xpath expr="//list/field[@name='account_id']" position="attributes">
+                <attribute name="string">Expense Account</attribute>
+                <attribute name="optional">hide</attribute>
+                <attribute name="column_invisible">0</attribute>
+                <attribute name="groups">account.group_account_manager</attribute>
+            </xpath>
+
+            <!-- <xpath expr="//field[@name='currency_id']" position="attributes">
+                <attribute name="options">{'no_open': True, 'no_create': True}</attribute>
+                <attribute name="readonly">1</attribute>
+            </xpath> -->
+            <xpath expr="//notebook/page/field[@name='line_ids']/list/field[@name='item']" position="before">
+                <field name="product_id" />
+                <field name="analytic_account_id" />
+             </xpath>
+
+            <!-- <xpath expr="//list/field[@name='product_id']" position="attributes">
+                <attribute name="options">{'no_open': True, 'no_create': True}</attribute>
+            </xpath>
+             <xpath expr="//list/field[@name='product_id']" position="after">
+                  <field name="analytic_account_id"/>
+            </xpath> -->
+            <!-- <xpath expr="//header/button[@name='btn_mv_submitted']" position="after">
+                <button name="action_supervisor_approval" type="object"
+                    string="Supervisor Approve Request"
+                    invisible="state != 'submitted'"
+                    confirm="Are you sure you want to approve this cash request?"
+                    class="oe_highlight" /> 
+            </xpath> -->
+
+            <!-- <xpath expr="//header/button[@name='approve_request']" position="replace">
+                <button name="approve_request" type="object"
+                    string="Approve Request"
+                    invisible="state != 'supervisor_approval'"
+                    confirm="Are you sure you want to approve this cash request?"
+                    class="oe_highlight"
+                    groups="requisitions.cash_group_manager" />
+            </xpath> -->
+            <xpath expr="//field[@name='line_ids']" position="attributes">
+                <attribute name="invisible">state not in ('draft','submitted')</attribute>
+            </xpath>
+            <xpath expr="//field[@name='line_ids']" position="after">
+                <field name="line_ids" mode="list,kanban" invisible="state in ('draft','submitted')" context="{'default_currency_id': currency_id}">
+                    <form>
+                        <group>
+                            <field name="product_id" readonly="1" />
+                            <field name="description" readonly="1" />
+                            <field name="qty" readonly="1" />
+                            <field name="unit_price" readonly="1" />
+                            <field name="total_price" readonly="1" />
+                        </group>
+                    </form>
+                    <list editable="bottom" delete="false" create="false">
+                        <field name="product_id" required="1" readonly="1" />
+                        <field name="description" readonly="0" />
+                        <field name="account_id" string="Expense Account" />
+                        <field name="qty" required="1" readonly="1" />
+                        <field name="currency_id" column_invisible="1" readonly="1" />
+                        <field name="unit_price" required="1" readonly="1" />
+                        <field name="total_price" readonly="1" force_save="1" />
+                    </list>
+                    <kanban class="o_kanban_mobile">
+                        <field name="total_price" />
+                        <field name="currency_id" />
+                        <control>
+                            <create name="add_product_control" string="Add an Item" />
+
+
+                        </control>
+                        <templates>
+                            <t t-name="card" class="row g-0 ps-0 pe-0">
+
+
+                                <main class="col">
+                                    <div class="row">
+                                        <div class="col">
+
+                                            <field name="product_id" class="fw-bold" readonly="1" />
+
+                                        </div>
+                                        <div class="col-auto">
+                                            <field name="total_price"
+                                                class="fw-bolder float-end pe-1" widget="monetary" />
+                                        </div>
+                                    </div>
+                                    <div class="text-muted">
+                                    Description:
+                                        <field name="description" readonly="1" />
+                                    </div>
+                                    <div class="text-muted">
+                                    Quantity:
+                                        <field name="qty" readonly="1" />
+                                    </div>
+                                    <div class="text-muted">
+                                    Unit Price:
+                                        <field name="unit_price" readonly="1" />
+                                    </div>
+
+                                </main>
+
+
+                            </t>
+                        </templates>
+                    </kanban>
+                </field>
+            </xpath>
+
+        </field>
+    </record>
+
+    <record id="vehicle_cash_requisition_list" model="ir.ui.view">
+        <field name="name">Cash Requisition</field>
+        <field name="model">cash.request</field>
+        <field name="priority">100</field>
+        <field name="arch" type="xml">
+            <list string="Cash Requisition">
+                <field name="name" />
+                <field name="vehicle_id" />
+                <field name="vehicle_request_type" />
+                <field name="requested_by" />
+                <field name="date" />
+                <field name="amount" sum="Total Amount" />
+                <field name="currency_id" column_invisible="1" />
+                <field name="state" widget="badge" decoration-success="state == 'done'"
+                    decoration-info="state not in ('done','draft','cancel', 'reject')"
+                    decoration-muted="state in ('draft','cancel')"
+                    decoration-danger="state == 'reject'" />
+            </list>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="vehicle_cash_requisition_form">
+        <field name="name">Vehicle Cash Requisition Form</field>
+        <field name="model">cash.request</field>
+        <field name="priority">100</field>
+        <field name="arch" type="xml">
+            
+            <form string="Cash Requisition">
+                <header>
+                    <button name="btn_mv_submitted" type="object" string="Submit Request"
+                        class="oe_highlight"
+                        confirm="Are you sure you want to submit this cash request?"
+                        invisible="state != 'draft'" />
+                    <button name="pm_approval" type="object"
+                        string="Project Manager Approval"
+                        invisible="state != 'submitted'"
+                        confirm="Are you sure you want to approve this cash request?"
+                        class="oe_highlight"
+                        groups="psi_engineering.group_project_manager" />
+                    <button name="procurement_approval" type="object"
+                        string="Procurement Manager Approval"
+                        invisible="state != 'procurement_approved'"
+                        confirm="Are you sure you want to approve this cash request?"
+                        class="oe_highlight"
+                        groups="psi_engineering.group_procurement" /> 
+                    <button name="finance_approval" type="object"
+                        string="Finance Manager Approval"
+                        invisible="state != 'finance_approved'"
+                        confirm="Are you sure you want to approve this cash request?"
+                        class="oe_highlight"
+                        groups="psi_engineering.group_finance" />
+                    <button name="md_approval" type="object"
+                        string="MD Approval"
+                        invisible="state != 'md_approval'"
+                        confirm="Are you sure you want to approve this cash request?"
+                        class="oe_highlight"
+                        groups="psi_engineering.group_md" />  
+                              
+                    <button name="cash_request"
+                        type="object" string="Cash Out"
+                        invisible="state != 'cash_out'"
+                        class="oe_highlight"
+                        confirm="Are you sure you want to complete this cash request?"
+                        groups="requisitions.cash_group_manager" />
+                    <!-- <button
+                        name="open_reject_request" type="object" string="Reject Request"
+                        invisible="state != 'submitted'"
+                        confirm="Are you sure you want to reject this cash request?"
+                        groups="cash_requisition.cash_group_manager" /> -->
+                    <button name="cancel_request"
+                        type="object" string="Cancel Request"
+                        confirm="Are you sure you want to cancel this cash request?"
+                        invisible="state != ('draft','cash_out')"
+                        groups="requisitions.cash_group_user" />
+                    <button name="reset_request"
+                        type="object" string="Reset Request"
+                        invisible="state == ('draft','submitted','cash_out')"
+                    />
+
+                    <field name="state" widget="statusbar"
+                        statusbar_visible="draft,submitted,procurement_approved,finance_approved,md_approval,cash_out,done,cancel" />
+                </header>
+                <sheet>
+
+                    <!-- <div class="oe_button_box" name="button_box">
+                        <button invisible="state not in ('approve','done')"
+                            type="object" class="oe_stat_button requisition_stat_button"
+                            name="open_receipt" icon="fa-money">
+                            Purchase Receipt
+                        </button>
+                    </div> -->
+
+                    <div class="oe_button_box" name="button_box">
+                        <button invisible="state not in ('approve','done')" type="action" class="oe_stat_button" name="%(account.action_move_in_receipt_type)d" context="{'search_default_requisition_id': id}" icon="fa-money" style="width: 200px;">
+                            Payment Receipt
+                        </button>
+                    </div>
+
+                    <div class="oe_title">
+                        <label for="name" />
+                        <h1>
+                            <field name="name" placeholder="Ref..." readonly="1" force_save="1" />
+                        </h1>
+                    </div>
+
+                    <group>
+                        <group>
+                            <field name="acc_id" invisible="1" />
+                            <!-- <field name="car_manager_id" /> -->
+                            <!-- <field name="payment" invisible="1" /> -->
+                            <!-- <field name="paid_journal_id" invisible="1" /> -->
+                        </group>
+                    </group>
+                    <group>
+                        <group>
+                            <field name="vehicle_id" required="1"
+                                readonly="state not in ('draft','submitted')"
+                                options="{'no_open': True, 'no_create': True}" /> 
+                            <field name="car_manager_id" />                           
+                            <field name="requested_by" readonly="1" force_save="1"
+                                invisible="requested_by == False"
+                                options="{'no_open': True, 'no_create': True}" />
+                            <field name="department_id" readonly="1" force_save="1"
+                                invisible="department_id == False"
+                                options="{'no_open': True, 'no_create': True}" />
+                        </group>
+                        <group>
+                            <!-- <field name="job_card_id" invisible="not job_card_id" readonly="1"
+                                force_save="1" /> -->
+                            <field name="vehicle_request_type" required="1"
+                                readonly="state not in ('draft','submitted')" />
+                            <field name="date" readonly="1" invisible="date == False" />
+                            <field name="user" widget="selection" readonly="1" force_save="1"
+                                invisible="user == False"
+                                options="{'no_open': True, 'no_create': True}" />
+                            <field name="approval_date" readonly="1"
+                                invisible="approval_date == False" />
+                        </group>
+                    </group>
+                    <group>
+                        <group invisible="vehicle_request_type != 'Fuel Requisition'">
+                            <field name="rate_per_litre"
+                                readonly="state not in ('draft','submitted')" />
+                            <field name="litres" readonly="state not in ('draft','submitted')" />
+                            <field name="tom_card_number"
+                                readonly="state not in ('draft','submitted')" />
+                            <field name="current_mileage" readonly="1" />
+                        </group>
+                        <group invisible="vehicle_request_type not in ('Service Requisition', 'Repair Requisition')">
+                            <field name="sr_vendor" readonly="state not in ('draft','submitted')"
+                                required="vehicle_request_type in ('Service Requisition', 'Repair Requisition')"
+                                options="{'no_open': True, 'no_create': True}" />
+                            <field name="description" readonly="state not in ('draft','submitted')"
+                                invisible="vehicle_request_type != 'Repair Requisition'"
+                                required="vehicle_request_type == 'Repair Requisition'" />
+                            <field name="current_mileage" readonly="1" />
+                            <field name="next_service_mileage"
+                                readonly="state not in ('draft','submitted')"
+                                invisible="vehicle_request_type != 'Service Requisition'" />
+                        </group>
+                        <group>
+                            <field name="currency_id" required="1" readonly="1" force_save="1"
+                                options="{'no_open': True, 'no_create': True}" />
+                            <field name="cost" invisible="1"/>
+                            <field name="amount" invisible="1" />
+                        </group>
+                    </group>
+                    <group>
+                        <group>
+                            <field name="notes" invisible="state != 'reject'"
+                                readonly="state != 'reject'" force_save="1" />
+                        </group>
+                    </group>
+                    <notebook invisible="0">
+                        <page string="Details">
+                            <field name="line_ids" readonly="state not in ('draft','submitted')" context="{'default_currency_id': currency_id}">
+                                <list editable="bottom">
+                                    <field name="product_id" required="1" />
+                                    <field name="description" />
+                                    <field name="account_id" string="Expense Account" invisible="1" />
+                                    <field name="qty" required="1" />
+                                    <field name="currency_id" column_invisible="1" />
+                                    <field name="unit_price" required="1" />
+                                    <field name="total_price" readonly="1" force_save="1" />
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter />
+            </form>
+        </field>
+    </record>
+
+    <record id="view_res_config_settings_inherit_psi_engineering" model="ir.ui.view">
+        <field name="name">psi_engineering.res.config.settings.inherit</field>
+        <field name="model">res.config.settings</field>
+        <field name="priority" eval="100" />
+        <field name="inherit_id" ref="account.res_config_settings_view_form" />
+        <field name="arch" type="xml">
+            
+            <xpath expr="//field[@name='has_chart_of_accounts']" position="before">
+                <h2>Fleet Management Requisition Settings</h2>
+                <div class="row mt16 o_settings_container" name="psi_engineering_container">
+                    <div class="col-xs-12 col-md-6 o_setting_box" >
+                        
+                        <div class="o_setting_right_pane mb8">
+                            <label for="fuel_product" string="Fuel Product" />
+                            <div class="content-group">
+                                <div class="mt16 row" style="display: block;">
+                                    <field name="fuel_product" class="ml16"
+                                        style="display: block; width: 100%;" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="o_setting_right_pane mb8">
+                            <label for="servicing_product" string="Service Product" />
+                            <div class="content-group">
+                                <div class="mt16 row" style="display: block;">
+                                    <field name="servicing_product" class="ml16"
+                                        style="display: block; width: 100%;" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="o_setting_right_pane mb8">
+                            <label for="repair_product" string="Repairs Product" />
+                            <div class="content-group">
+                                <div class="mt16 row" style="display: block;">
+                                    <field name="repair_product" class="ml16"
+                                        style="display: block; width: 100%;" />
+                                </div>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+            </xpath>
+
+        </field>
+    </record>
+
+
+
+    
+    
+   
+
+
+
+
+   
+
+    <record id="view_vehicle_expense_list" model="ir.ui.view">
+        <field name="name">vehicle.expense.list</field>
+        <field name="model">vehicle.expense</field>
+        <field name="arch" type="xml">
+            <list string="Vehicle Expenses" editable="top">
+                <field name="name" />
+                <field name="description" />
+            </list>
+        </field>
+    </record>
+
+    <record id="view_vehicle_expense_form" model="ir.ui.view">
+        <field name="name">vehicle.expense.form</field>
+        <field name="model">vehicle.expense</field>
+        <field name="arch" type="xml">
+            <form string="Vehicle Expense">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name" />
+                            <field name="description" />
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+
+    <record id="action_custom_fleet_vehicle" model="ir.actions.act_window">
+        <field name="name">Fleet Vehicles</field>
+        <field name="res_model">custom.fleet.vehicle</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_custom_fleet" name="Fleet Management" sequence="10"
+        web_icon="fleet,static/description/icon.png" />
+    <menuitem id="menu_custom_fleet_vehicles" name="Vehicles" parent="menu_custom_fleet"
+        action="action_custom_fleet_vehicle" sequence="1" />
+
+    <record model="ir.actions.act_window" id="fuel_requesition_action">
+        <field name="name">Fuel Requisitions</field>
+        <field name="res_model">cash.request</field>
+        <field name="view_mode">list,form,pivot</field>
+        <field name="view_ids"
+            eval="[(5, 0, 0),
+        (0, 0, {'view_mode': 'list', 'view_id': ref('psi_engineering.vehicle_cash_requisition_list')}),
+        (0, 0, {'view_mode': 'form', 'view_id': ref('psi_engineering.vehicle_cash_requisition_form')})]" />
+        <field name="domain">[('vehicle_request_type','=','Fuel Requisition')]</field>
+        <field name="context">{'default_vehicle_request_type': 'Fuel Requisition'}</field>
+        <field name="help" type="html">
+            <p>You can start your Fuel requisitions here</p>
+        </field>
+    </record>
+
+    <record model="ir.actions.act_window" id="service_requesition_action">
+        <field name="name">Service Requisitions</field>
+        <field name="res_model">cash.request</field>
+        <field name="view_mode">list,form,pivot</field>
+        <field name="view_ids"
+            eval="[(5, 0, 0),
+        (0, 0, {'view_mode': 'list', 'view_id': ref('psi_engineering.vehicle_cash_requisition_list')}),
+        (0, 0, {'view_mode': 'form', 'view_id': ref('psi_engineering.vehicle_cash_requisition_form')})]" />
+        <field name="domain">[('vehicle_request_type','=','Service Requisition')]</field>
+        <field name="context">{'default_vehicle_request_type': 'Service Requisition'}</field>
+        <field name="help" type="html">
+            <p>You can start your Service Requisitions here</p>
+        </field>
+    </record>
+
+    <record model="ir.actions.act_window" id="repairs_requesition_action">
+        <field name="name">Repairs Requisitions</field>
+        <field name="res_model">cash.request</field>
+        <field name="view_mode">list,form,pivot</field>
+        <field name="view_ids"
+            eval="[(5, 0, 0),
+        (0, 0, {'view_mode': 'list', 'view_id': ref('psi_engineering.vehicle_cash_requisition_list')}),
+        (0, 0, {'view_mode': 'form', 'view_id': ref('psi_engineering.vehicle_cash_requisition_form')})]" />
+        <field name="domain">[('vehicle_request_type','=','Repair Requisition')]</field>
+        <field name="context">{'default_vehicle_request_type': 'Repair Requisition'}</field>
+        <field name="help" type="html">
+            <p>You can start your Repairs Requisitions here</p>
+        </field>
+    </record>
+
+   
+
+    <record id="action_vehicle_expense" model="ir.actions.act_window">
+        <field name="name">Other Vehicle Expenses</field>
+        <field name="res_model">vehicle.expense</field>
+        <field name="view_mode">list,form,pivot</field>
+    </record>
+
+   
+
+
+    <menuitem name="Odometer Logs" parent="menu_custom_fleet" id="custom_odometer_logs"
+        action="fleet.fleet_vehicle_odometer_action" sequence="1" />
+
+    <menuitem id="fuel_cash_requesition_menu" action="fuel_requesition_action"
+        parent="menu_custom_fleet" name="Fuel Requisitions" sequence="2" />
+   
+
+    <menuitem id="service_cash_requesition_menu" action="service_requesition_action"
+        parent="menu_custom_fleet" name="Service Requisitions" sequence="4" />
+    <menuitem id="repairs_cash_requesition_menu" action="repairs_requesition_action"
+        parent="menu_custom_fleet" name="Repairs Requisitions" sequence="5" />
+
+   
+    <menuitem name="Configurations" parent="menu_custom_fleet" id="custom_fleet_configuration"
+        sequence="100" groups="fleet.fleet_group_manager" />
+
+    <menuitem name="Models" parent="custom_fleet_configuration"
+        id="custom_fleet_models_configuration" sequence="10" groups="fleet.fleet_group_manager" />
+    <menuitem action="fleet.fleet_vehicle_model_brand_action"
+        parent="custom_fleet_models_configuration" id="custom_fleet_vehicle_model_brand_menu"
+        sequence="1" />
+    <menuitem action="fleet.fleet_vehicle_model_action" parent="custom_fleet_models_configuration"
+        id="custom_fleet_vehicle_model_menu" sequence="5" />
+    <menuitem action="fleet.fleet_vehicle_model_category_action"
+        parent="custom_fleet_models_configuration" id="custom_fleet_vehicle_model_category_menu"
+        sequence="10" />
+
+    <menuitem id="menu_vehicle_expense_config" name="Vehicle Expenses"
+        parent="custom_fleet_configuration" action="action_vehicle_expense" sequence="11" />
+
+</odoo>

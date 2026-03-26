@@ -1,0 +1,159 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+
+    <template id="milestone_report_template">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout" > 
+                <t t-foreach="docs" t-as="o">
+                    
+                    <div class="page">
+                        <div class="oe_structure"/>
+                        <!-- Project and Milestone Details -->
+                        <h2>Milestone Report</h2>
+                        <table class="table table-sm mt32">
+                            <tr>
+                                <td><strong>Project Name:</strong></td>
+                                <td><span t-field="o.project_id.name"/></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Milestone Template:</strong></td>
+                                <td><span t-field="o.milestone_template_id.name"/></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Project Type:</strong></td>
+                                <td><span t-field="o.project_type_id.name"/></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Checklist Completed:</strong></td>
+                                <td>
+                                    <span t-if="o.checklist_completed">Yes</span>
+                                    <span t-if="not o.checklist_completed">No</span>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- Checklist Items -->
+                        <h3>Milestone Checklist</h3>
+                        <table class="table table-bordered table-condensed">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Question/Item</th>
+                                    <!-- <th>Answer Type</th> -->
+                                    <th>Answer</th>
+                                    <th>Comments</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="o.checklist_ids" t-as="checklist">
+                                    <tr>
+                                        <td><span t-field="checklist.no"/></td>
+                                        <td><span t-field="checklist.name"/></td>
+                                        <!-- <td><span t-field="checklist.answer_type"/></td> -->
+                                        <td>
+                                            <t t-if="checklist.answer_type == 'pass_fail'">
+                                                <span t-field="checklist.answer_pass_fail"/>
+                                            </t>
+                                            <t t-if="checklist.answer_type == 'number'">
+                                                <span t-field="checklist.answer_number"/>
+                                            </t>
+                                            <t t-if="checklist.answer_type == 'text'">
+                                                <span t-field="checklist.answer_text"/>
+                                            </t>
+                                        </td>
+                                        <td><span t-field="checklist.comments"/></td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+
+                        <!-- Images -->
+                        <h3>Milestone Images</h3>
+                        <t t-foreach="o.image_ids" t-as="image">
+                            <div class="image-box">
+                                <h4><span t-field="image.name"/></h4>
+                                <img t-att-src="'data:image/png;base64,' + image.image.decode('utf-8')" style="max-width: 200px;"/>
+                            </div>
+                        </t>
+
+                        
+                       <div style="display: flex;">
+                            <!-- Project Manager Column -->
+                            <div style="flex: 1; text-align: center; padding-right: 100px;">
+                                <div style="font-weight: bold;">Project Manager:</div>
+                                <div style="padding-top: 20px;">
+                                    <span t-field="o.user_id.name"/>
+                                </div>
+                            </div>
+
+                            <!-- Employee Signature Column -->
+                            <div style="flex: 1; text-align: center; padding-left: 100px;">
+                                <div style="font-weight: bold;">Employee Signature:</div>
+                                <div style="padding-top: 20px;">
+                                    <t t-if="o.user_id.signature and isinstance(o.user_id.signature, bytes)">
+                                        <img t-att-src="'data:image/png;base64,' + o.user_id.signature.decode('utf-8')" style="max-height:60px;"/>
+                                    </t>
+                                    <t t-else="">
+                                        <p>No Signature Available</p>
+                                    </t>
+                                </div>
+                            </div>
+                        </div>
+
+
+
+                                
+                    </div>
+
+                        <!-- Styling -->
+                        <style> 
+                        th {
+                            vertical-align: baseline;
+                            text-align: center;
+                        }
+                        p, span, div {
+                            font-weight: 400;
+                            color: #000000;
+                        }
+                        strong {
+                            color: #000000 !important;
+                        }
+                        .tax_invoice_text span {
+                            font-size: 30px;
+                        }
+                        address span {
+                            color: #2b2775 !important;
+                        }
+                        .border-top-grey {
+                            border-top: 1px solid grey !important;
+                        }
+                        .footer {
+                            position: relative;
+                            bottom: 0;
+                            width: 100%;
+                            padding: 10px 0;
+                        }
+                        </style>
+                
+                
+                </t>
+            </t> 
+        </t>
+    </template>
+    
+    <record id="action_print_milestone_report" model="ir.actions.report">
+        <field name="name">Milestone Report</field>
+        <field name="model">project.milestone</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">psi_engineering.milestone_report_template</field>
+        <field name="report_file">psi_engineering.milestone_report_template</field>
+        <field name="binding_model_id" ref="project.model_project_milestone"/>
+        <field name="binding_type">report</field>
+        <!-- <field name="paperformat_id" ref="psi_engineering.custom_paperformat_milestone"/> -->
+        <field name="print_report_name">'Milestone Report - %s' % (object.name)</field>
+    </record>
+
+    
+
+    
+</odoo>

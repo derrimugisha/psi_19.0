@@ -1,0 +1,125 @@
+<odoo>
+  <data>
+
+    <record id="ir_cron_compute_performance_progress" model="ir.cron">
+      <field name="name">Compute Performance Progress</field>
+      <field name="model_id" ref="model_performance" />
+      <field name="state">code</field>
+      <field name="code">model.action_compute_cron_progress()</field>
+      <field name="user_id" ref="base.user_root" />
+      <field name="interval_number">1</field>
+      <field name="interval_type">days</field>
+      <field name="active" eval="True" />
+    </record>
+
+
+    <record id="view_performance_settings_form" model="ir.ui.view">
+      <field name="name">performance.config.settings</field>
+      <field name="model">res.config.settings</field>
+      <field name="inherit_id" ref="base.res_config_settings_view_form" />
+      <field name="arch" type="xml">
+        <xpath expr="//form" position="inside">
+          <block title="Performance Settings" id="performance_fields">
+            <setting name="Performance_settings_fields" string="Performance Fields">
+              <group>
+                <field name="model_ids" widget="many2many_tags" />
+              </group>
+            </setting>
+          </block>
+        </xpath>
+      </field>
+    </record>
+
+
+    <!-- Form View -->
+      <record id="view_performance_form" model="ir.ui.view">
+        <field name="name">performance.form</field>
+        <field name="model">performance</field>
+        <field name="arch" type="xml">
+          <form string="Employee Performance">
+            <sheet>
+            <header>
+              <button name="action_compute_progress"
+                string="Compute Progress"
+                type="object"
+                class="btn-primary" />
+            </header>
+              <group>
+              <!-- <field name="name" /> -->
+                <field name="employee_id" />
+                <field name="start_date" />
+                <field name="end_date" />
+              </group>
+              <notebook>
+                <page string="Performance Lines">
+                <field name="performance_line_ids">
+                    <list>
+                      <field name="model_id" />
+                      <field name="target" />
+                      <field name="done" />
+                      <field name="percentage" widget="percentage" />
+                    </list>
+                  </field>
+                </page>
+              </notebook>
+            </sheet>
+          </form>
+        </field>
+      </record>
+
+    <!-- Tree View -->
+      <record id="view_performance_tree" model="ir.ui.view">
+        <field name="name">performance.tree</field>
+        <field name="model">performance</field>
+        <field name="arch" type="xml">
+          <list>
+            <field name="employee_id" />
+            <field name="start_date" />
+            <field name="end_date" />
+          </list>
+        </field>
+      </record>
+
+    <!-- Action -->
+      <record id="action_performance" model="ir.actions.act_window">
+        <field name="name">Performance Tracking</field>
+        <field name="res_model">performance</field>
+        <field name="view_mode">list,form</field>
+      </record>
+
+
+    <record id="performance_line_form_view" model="ir.ui.view">
+      <field name="name">performance.line.form</field>
+      <field name="model">performance.line</field>
+      <field name="arch" type="xml">
+        <form string="Performance Line List">
+          <sheet>
+          
+            <group>
+              <group>
+                <field name="model_id" required="1" />
+                <div name="model_id_container">
+                  <field name="model_name" invisible="1" />
+                  <field name="model_real" invisible="1" />
+                  <field name="model_domain" widget="domain"
+                    options="{'model': 'model_real', 'foldable': true}"
+                  />
+                </div>
+                <field name="model_domain" invisible="1" />
+
+                <field name="target" required="1" />
+              </group>
+              <group>
+                <field name="done" readonly="1" />
+                <field name="percentage" readonly="1" widget="percentage" />
+              </group>
+            </group>
+          </sheet>
+        </form>
+      </field>
+    </record>
+   
+    
+  
+  </data>
+</odoo>

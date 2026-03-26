@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="milestone_checklist_template" name="Milestone Checklist Form">
+        <t t-call="portal.portal_layout">
+            <t t-call="portal.portal_record_layout">
+                <t t-set="card_header">
+                    <h5 class="mb-0">
+                        Milestone Checklist for <t t-esc="milestone.name"/>
+                    </h5>
+                </t>
+                <t t-set="card_body">
+                    <div id="wrap">
+                        <div class="container">
+                            
+                            <form action="/milestone/checklist/submit" method="POST" enctype="multipart/form-data">
+                                <input type="hidden" name="milestone_id" t-att-value="milestone.id"/>
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                <t t-foreach="milestone.checklist_ids" t-as="checklist">
+                                    <div t-if="checklist.display_type == 'line_section'">
+                                        <h3>
+                                            <t t-esc="checklist.name"/>
+                                        </h3>
+                                    </div>
+                                    <div t-if="checklist.display_type == 'line_note'">
+                                        <p>
+                                            <em>
+                                                <t t-esc="checklist.name"/>
+                                            </em>
+                                        </p>
+                                    </div>
+                                    <div t-if="not checklist.display_type">
+                                        <div class="form-group">
+                                            <label>
+                                                <t t-esc="checklist.name"/>
+                                            </label>
+                                            <t t-if="checklist.answer_type == 'pass_fail'">
+                                                <select t-att-name="'answer_' + str(checklist.id)" class="form-control" required="True">
+                                                    <option value="pass">Pass</option>
+                                                    <option value="fail">Fail</option>
+                                                </select>
+                                            </t>
+                                            <t t-if="checklist.answer_type == 'number'">
+                                                <input t-att-name="'answer_' + str(checklist.id)" type="number" class="form-control" t-att-value="checklist.answer_number or ''" required="True"/>
+                                            </t>
+
+                                            <t t-if="checklist.answer_type == 'text'">
+                                                <textarea t-att-name="'answer_' + str(checklist.id)" class="form-control" required="True">
+                                                    <t t-esc="checklist.answer_text or ''"/>
+                                                </textarea>
+                                            </t>
+
+                                        </div>
+                                    </div>
+                                </t>
+                                <!-- Section to dynamically add images and descriptions -->
+                                <h3>Add Images and Descriptions</h3>
+                                <div id="dynamic_images">
+                                    <div class="form-group" id="image_section_1">
+                                        <label>Image Description:</label>
+                                        <input type="text" name="image_description_1" class="form-control" placeholder="Enter description"/>
+                                        <label>Upload Image:</label>
+                                        <input type="file" name="image_file_1" class="form-control"/>
+                                    </div>
+                                </div>
+                                <button type="button" id="add_image_button" class="btn btn-secondary">Add Another Image</button>
+
+                                <button type="submit" class="btn btn-primary">Submit</button>
+                            </form>
+                            <script>
+                let imageCount = 1;
+                document.getElementById('add_image_button').onclick = function() {
+                    imageCount++;
+                    const newImageSection = `
+                                <div class="form-group" id="image_section_${imageCount}">
+                                    <label>Image Description:</label>
+                                    <input type="text" name="image_description_${imageCount}" class="form-control" placeholder="Enter description"/>
+                                    <label>Upload Image:</label>
+                                    <input type="file" name="image_file_${imageCount}" class="form-control"/>
+                                </div>`;
+                    document.getElementById('dynamic_images').insertAdjacentHTML('beforeend', newImageSection);
+                };
+                            </script>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <template id="milestone_checklist_thank_you" name="Thank You">
+        <t t-call="portal.portal_layout">
+            <t t-call="portal.portal_record_layout">
+                <t t-set="card_header">
+                    <h5 class="mb-0">
+                        Success !!!
+                    </h5>
+                </t>
+                <t t-set="card_body">
+                    <div id="wrap">
+
+                        <div class="container">
+                            <h2>Thank you for filling out the checklist!</h2>
+                            <p>Your responses have been recorded.</p>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <template id="milestone_checklist_completed" name="Milestone Checklist Completed">
+        <t t-call="portal.portal_layout">
+            <t t-call="portal.portal_record_layout">
+                <t t-set="card_header">
+                    <h5 class="mb-0">
+                        Error !!!
+                    </h5>
+                </t>
+                <t t-set="card_body">
+                    <div id="wrap">
+                        <div class="container">
+                            <h2>Thank you for filling out the checklist!</h2>
+                            <p>This Milestone Check List has already been Filled. Contact the Admin to edit it in the Backend</p>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+
+
+
+</odoo>

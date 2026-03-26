@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="cash_requisition_email_template" model="mail.template">
+        <field name="name">Cash Requisition Email Template </field>
+        <field name="model_id" ref="model_cash_request"/>
+        <field name="email_from">{{ object.company_id.email}}</field>
+        <!-- <field name="email_to">{{ object.partner_id.email}}</field> -->
+        <field name="subject">Cash Requisition</field>
+        <field name="body_html" type="html">
+            <div style="padding:0px; margin:0px;">
+                <p style="padding:0px; margin:0px; font-size:12px">Hello Cash Requisition Team,
+                <br/>
+                <br/>
+                    Greetings from <strong>  <t t-out="object.requested_by.name"/></strong>. <br/>
+                    I hope this email finds you well,<br/>
+                    I have submitted a cash requisition with  reference  <strong><t t-out="object.name"/></strong><br/>
+                    Kindly Proceed and Approved. <strong><t t-out="object.url"/></strong> <br/>
+                    Thank you
+                </p>
+                Regards,<br/>
+                <t t-out="object.requested_by.name"/>
+            </div>
+        </field>
+    </record>
+
+      <record id="email_template_estimator_notification" model="mail.template">
+        <field name="name">Lead Estimation Notification</field>
+        <field name="model_id" ref="crm.model_crm_lead"/>
+        <field name="subject">New Lead Assigned for Estimation - {{object.name}}</field>
+        <field name="email_to">{{object.estimate_assignee_id.email}}</field>
+        <field name="body_html" type="html">
+            
+                <p>Hello <t t-out="object.estimate_assignee_id.name"/> ,</p>
+                <br/>
+                <p>You have been assigned a new lead for estimation:</p>
+                <ul>
+                    <li><strong>Lead:</strong> <t t-out="object.name"/></li>
+                    <li><strong>Customer:</strong> <t t-out="object.partner_id.name"/></li>
+                    <li><strong>Description:</strong> <t t-out="object.description"/></li>
+                    <li><strong>Estimation Due Date:</strong> <t t-out="object.estimation_due_date"/></li>
+                </ul>
+                <p>Please log in to the system to review and proceed with the estimation.</p>
+            
+        </field>
+    </record>
+
+    <record id="invoice_bill_email_template" model="mail.template">
+        <field name="name">Invoice/Bill Overdue Notification Template</field>
+        <field name="model_id" ref="model_account_move" />
+        <field name="email_from">{{ object.company_id.email }}</field>
+        <!-- Adjust recipient logic if necessary -->
+        <field name="email_to">${object._get_finance_group_emails()}</field>
+        <field name="subject">Accountabilty Overdue Notification</field>
+        <field name="body_html" type="html">
+            <div style="padding:0px; margin:0px;">
+                <p style="padding:0px; margin:0px; font-size:12px"> Dear Finance Team, <br />
+                <br />
+                    An invoice with reference <strong>
+                        <t t-out="object.url" /> <t t-out="object.name" />
+                    </strong>
+                    accountability status is now overdue. <br /> Please review and proceed with approval at your earliest
+                    convenience. <br />
+                <br /> Thank you! </p>
+                <p>Regards,<br /> Administration</p>
+            </div>
+        </field>    
+    </record>
+
+    <record id="finance_reconciliation_reminder_template" model="mail.template">
+        <field name="name">Weekly Finance Reconciliation Reminder</field>
+        <field name="model_id" ref="model_account_move"/>
+        <field name="email_from">{{ object.company_id.email }}</field>
+        <field name="email_to">${object._get_finance_group_emails()}</field>
+        <field name="subject">Reminder: Weekly Payment Reconciliation</field>
+        <field name="body_html" type="html">
+            <div style="padding:0px; margin:0px;">
+                <p style="padding:0px; margin:0px; font-size:12px"> Dear Finance Team, <br />
+                <br />
+                    This is a friendly reminder to **reconcile all pending payments** for the week. <br />
+                    Please ensure that all transactions are correctly recorded and reconciled in the system. <br />
+                <br />
+                Thank you for keeping the accounts up to date! </p>
+                <p>Best Regards,<br /> Finance Administration</p>
+            </div>
+        </field>
+    </record>
+
+    <record id="email_pr_submit_pm" model="mail.template">
+        <field name="name">Purchase Requisition Submission - Project Manager Approval</field>
+        <field name="model_id" ref="model_po_requisition"/>
+        <field name="email_from">{{ object.create_uid.email }}</field>
+        <field name="email_to">morris.wokorach@psiengineering.co.ug</field>
+        <field name="subject">Approval Required: Purchase Requisition {{ object.pr_sequence }}</field>
+        <field name="body_html" type="html">
+            <div>
+                <p>Dear Morris,</p>
+                <p>A new Purchase Requisition (<t t-out="object.pr_sequence" />) has been submitted and requires your approval.</p>
+                <p>Details:</p>
+                <ul>
+                    <li>Requested by: <t t-out="object.create_uid.name" /></li>
+                    <li> Reference URL: <t t-out="object.url" /><br /></li>
+                    <!-- <li>Total Amount: {{ object.currency_id.symbol }} {{ object.amount_total }}</li> -->
+                </ul>
+                <p>Please review and approve at your earliest convenience.</p>
+                <p>Best Regards,<br/>Projects Team</p>
+            </div>
+        </field>
+    </record>
+
+
+    <record id="email_pr_proc" model="mail.template">
+        <field name="name">Purchase Requisition Submission - Procurement Manager Approval</field>
+        <field name="model_id" ref="model_po_requisition"/>
+        <field name="email_from">{{ object.create_uid.email }}</field>
+        <field name="email_to">${object._get_procurement_group_emails()}</field>
+        <field name="subject">Approval Required: Purchase Requisition {{ object.pr_sequence }}</field>
+        <field name="body_html" type="html">
+            <div>
+                <p>Dear Procurement team,</p>
+                <p>A new Purchase Requisition (<t t-out="object.pr_sequence" />) has been submitted and requires your approval.</p>
+                <p>Details:</p>
+                <ul>
+                    <li>Requested by: <t t-out="object.create_uid.name" /></li>
+                    <li> Reference URL: <t t-out="object.url" /><br /></li>
+                    <!-- <li>Total Amount: {{ object.currency_id.symbol }} {{ object.amount_total }}</li> -->
+                </ul>
+                <p>Please review and approve at your earliest convenience.</p>
+                <p>Best Regards,<br/>Projects Team</p>
+            </div>
+        </field>
+    </record>
+
+<record id="email_pr_finance" model="mail.template">
+    <field name="name">Purchase Requisition - Finance Fund Allocation</field>
+    <field name="model_id" ref="model_po_requisition"/>
+    <field name="email_from">{{ object.create_uid.email }}</field>
+    <field name="email_to">${object._get_finance_group_emails()}</field>
+    <field name="subject">Action Required: Fund Allocation for PR {{ object.pr_sequence }}</field>
+    <field name="body_html" type="html">
+        <div>
+            <p>Dear Finance Team,</p>
+            <p>The following Purchase Requisition (<t t-out="object.pr_sequence" />) has been approved by the Project Manager and requires fund allocation.</p>
+            <p>Details:</p>
+            <ul>
+                <li>Requested by: <t t-out="object.create_uid.name" /></li>
+                <li> Reference URL: <t t-out="object.url" /><br /></li>
+                <!-- <li>Total Amount: {{ object.currency_id.symbol }} {{ object.amount_total }}</li> -->
+            </ul>
+            <p>Please ensure that funds are allocated accordingly.</p>
+            <p>Best Regards,<br/>Procurement Team</p>
+        </div>
+    </field>
+</record>
+
+<record id="email_pr_md_approval" model="mail.template">
+    <field name="name">Purchase Requisition - Managing Director Approval</field>
+    <field name="model_id" ref="model_po_requisition"/>
+    <field name="email_from">{{ object.create_uid.email }}</field>
+    <field name="email_to">ian.sedirimba@psiengineering.co.ug</field>
+    <field name="subject">Urgent Approval: Purchase Requisition Exceeding Budget</field>
+    <field name="body_html" type="html">
+        <div>
+            <p>Dear Ian,</p>
+            <p>The following Purchase Requisition (<t t-out="object.pr_sequence" />) exceeds the budget limit and requires your approval.</p>
+            <p>Details:</p>
+            <ul>
+                <li>Requested by: <t t-out="object.create_uid.name" /></li>
+                <!-- <li>Total Amount: <t t-out=" object.currency_id.symbol"/>  <t t-out="object.total"/></li> -->
+                <li> Reference URL: <t t-out="object.url" /><br /></li>
+                <!-- <li>Budget Limit: {{ object.currency_id.symbol }} {{ object.budget_limit }}</li> -->
+            </ul>
+            <p>Please review and approve or reject as necessary.</p>
+            <p>Best Regards,<br/>Finance and Procurement Team</p>
+        </div>
+    </field>
+</record>
+
+
+</odoo>

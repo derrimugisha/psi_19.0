@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_estimation_popup_form" model="ir.ui.view">
+        <field name="name">estimation.popup.form</field>
+        <field name="model">estimation.model</field>
+        <field name="arch" type="xml">
+            <form string="Estimation Details">
+                <header>
+                    <button name="action_submit" type="object" string="Submit" invisible="state not in ['draft']" groups="psi_engineering.group_estimator" class="btn-primary"/>
+                    <button name="action_approve" type="object" string="Approve" invisible="state not in ['submitted']"  groups="psi_engineering.group_md" class="btn-success"/>
+                    <button name="action_reject" type="object" string="Reject" invisible="state not in ['submitted']" groups="psi_engineering.group_md" class="btn-danger"/>
+                    <button name="action_reset_to_draft" type="object" string="Reset to Draft" invisible="state not in ['submitted']"  class="btn-secondary"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,submitted,approved,rejected"/>
+                </header>
+
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="product_specification_id" string="product specification" options="{'no_create': True, 'no_open': True}" required="1"/>
+                            <field name="lead_id" string="Lead id" readonly="1"/>
+                        </group>
+                    </group>
+                    <group>
+
+                        <group string="Product Information">
+                            <field name="product_id"/>
+                            <field name="item_description"/>
+                            <field name="detailed_description"/>
+                        </group>
+
+                        <group string="Size and Quantity">
+
+                            <field name="quantity"/>
+                            <field name="uom_id"/>
+                        </group>
+                    </group>
+
+                    <group>
+                        <group string="Remarks and Attachments">
+                            <field name="remarks"/>
+                            <field name="attachment_ids" widget="many2many_binary"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Material Costs">
+                            <field name="material_costs_ids" widget="one2many" context="{'default_lead_id':lead_id,'default_product_specification_id':product_specification_id}">
+                                <list string="Material Costs" editable="bottom">
+                                    <field name="serial_number"/>
+                                    <field name="product_id"/>
+                                    <field name="description"/>
+                                    <!-- <field name="task_id"/> -->`
+                                    <field name="quantity"/>
+                                    <field name="length" optional="hide"/>
+                                    <field name="width" optional="hide"/>
+                                    <field name="height" optional="hide"/>
+                                    <field name="total_dimension" optional="hide"/>
+                                    <field name="product_specification_id" column_invisible="1" options="{'no_create': True, 'no_open': True}" required="1"/>
+                                    <field name="lead_id" column_invisible="1" />
+                                    <field name="uom_id"/>
+                                    <field name="unit_price"/>
+                                    <field name="currency_id"/>
+                                    <field name="total_cost" readonly="1"/>
+                                </list>
+                            </field>
+                            <group class="oe_subtotal_footer" colspan="2">
+                                <field name="amount_total_material_costs" colspan="2" readonly="1"/>
+                            </group>
+                        </page>
+
+                        <page string="Labour Costs">
+                            <field name="labour_costs_ids" readonly="state not in ['draft']" widget="one2many" context="{'default_lead_id':lead_id,'default_product_specification_id':product_specification_id}">
+                                <list string="Labour Costs" editable="bottom">
+                                    <field name="serial_number"/>
+                                    <field name="product_id"/>
+                                    <field name="description"/>
+                                    <field name="product_specification_id" column_invisible="1" options="{'no_create': True, 'no_open': True}" required="1"/>
+                                    <field name="lead_id" column_invisible="1" />
+                                    <field name="number_of_people"/>
+                                    <field name="rate_per_day"/>
+                                    <field name="number_of_days"/>
+                                    <field name="total_cost" readonly="1"/>
+                                </list>
+                            </field>
+                            <group class="oe_subtotal_footer" colspan="2">
+                                <field name="amount_total_labour_costs" colspan="2" readonly="1"/>
+                            </group>
+                        </page>
+
+                        <page string="Overhead Costs">
+                            <field name="overhead_costs_ids" readonly="state not in ['draft']" widget="one2many" context="{'default_lead_id':lead_id,'default_product_specification_id':product_specification_id}">
+                                <list string="Overhead Costs" editable="bottom">
+                                    <field name="product_id"/>
+                                    <field name="description"/>
+                                    <field name="quantity"/>
+
+                                    <field name="amount" string="Unit Cost"/>
+                                    <field name="product_specification_id" column_invisible="1" options="{'no_create': True, 'no_open': True}" required="1"/>
+                                    <field name="lead_id" column_invisible="1" />
+                                    <field name="total_overhead_cost" readonly="1"/>
+                                </list>
+                            </field>
+                            <group class="oe_subtotal_footer" colspan="2">
+                                <field name="amount_total_overhead_costs" colspan="2" readonly="1"/>
+                            </group>
+                        </page>
+
+                        <page string="Equipment Costs">
+                            <field name="equipment_cost_ids" readonly="state not in ['draft']" widget="one2many" context="{'default_lead_id':lead_id,'default_product_specification_id':product_specification_id}">
+                                <list string="Overhead Costs" editable="bottom">
+                                    <field name="product_specification_id" column_invisible="1" options="{'no_create': True, 'no_open': True}" required="1"/>
+                                    <field name="lead_id" column_invisible="1" />
+                                    <field name="product_id" options="{'no_create':1,'no_create_edit':1,'no_quick_create':1}"/>
+                                    <field name="description" readonly="0"/>
+                                    <field name="unit_cost" readonly="0"/>
+                                    <field name="quantity" readonly="0"/>
+                                    <field name="total_amount" sum="Total Equipment cost" readonly="1"/>
+                                </list>
+                            </field>
+
+                        </page>
+
+                        <page string="Total Estimated Costs Summary">
+
+                            <group>
+                                <group>
+                                    <field name="amount_total_material_costs" readonly="1" string="Total Material Costs"/>
+                                    <field name="amount_total_labour_costs" readonly="1" string="Total Labour Costs"/>
+                                    <field name="amount_total_overhead_costs" readonly="1" string="Total Overhead Costs"/>
+                                    <field name="total_estimated_cost" readonly="1" string="Total Overhead Costs"/>
+                                </group>
+                                <group>
+                                    <field name="amount_total_estimation_cost" readonly="1" string="Total Estimated Costs"/>
+                                </group>
+                            </group>
+
+                            <group>
+                                <group>
+                                    <field name="margin_type" string="Margin Type"/>
+                                    <field name="margin_value" string="Margin Value"/>
+                                </group>
+                                <group>
+                                    <field name="amount_total_with_margin" readonly="1" string="Total with Margin"/>
+                                </group>
+                            </group>
+
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="product_specification_list" model="ir.ui.view">
+        <field name="name">product.specification.list</field>
+        <field name="model">product.specification</field>
+        <field name="arch" type="xml">
+            <list string="Product Specification" >
+                <field name="serial_number" placeholder="1.0"/>
+                <field name="product_id" domain="[('service_tracking', 'in', ['project_only','task_in_project'])]"/>
+                <field name="description"/>
+                <field name="site_id" />
+                <field name="site_name" />
+                <field name="quantity"/>
+                <field name="length" optional="hide"/>
+                <field name="width" optional="hide"/>
+                <field name="height" optional="hide"/>
+                <field name="total_dimension" optional="hide"/>
+                <field name="uom_id"/>
+                <field name="price_unit"/>
+                <field name="price_subtotal" readonly="1"/>
+                <field name="estimation_id" readonly="1" force_save="1" column_invisible="1"/>
+                <field name="total_estimated_cost"/>
+                <field name="total_estimated_cost_withmargin"/>
+                <button name="action_view_estimate2" string="Add/View Estimate" type="object" groups="psi_engineering.group_estimator" class="btn-primary" />
+            </list>
+        </field>
+    </record>
+
+    <record id="action_view_product_specification" model="ir.actions.act_window">
+        <field name="name">Draft Estimations</field>
+        <field name="res_model">product.specification</field>
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="product_specification_list"/>
+        <field name="domain">[('state', 'in', ['draft'])]</field>
+        <field name="context">{'create': False, 'delete': False}</field>
+    </record>
+
+    <record id="action_view_submitted_product_specification" model="ir.actions.act_window">
+        <field name="name">Submitted Estimates</field>
+        <field name="res_model">product.specification</field>
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="product_specification_list"/>
+        <field name="domain">[('state','=','submitted')]</field>
+        <field name="context">{'create': False, 'delete':False,}</field>
+        <!-- <field name="target">new</field> -->
+    </record>
+
+    <record id="action_view_approved_product_specification" model="ir.actions.act_window">
+        <field name="name">Approved Estimates </field>
+        <field name="res_model">product.specification</field>
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="product_specification_list"/>
+        <field name="domain">[('state','=','approved')]</field>
+        <field name="context">{'create': False, 'delete':False,}</field>
+        <!-- <field name="target">new</field> -->
+    </record>
+
+    <record id="action_view_rejected_product_specification" model="ir.actions.act_window">
+        <field name="name">Rejected Estimations</field>
+        <field name="res_model">product.specification</field>
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="product_specification_list"/>
+        <field name="domain">[('state','=','rejected')]</field>
+        <field name="context">{'create': False, 'delete':False,}</field>
+        <!-- <field name="target">new</field> -->
+    </record>
+
+    <record id="action_view_estimation_popup" model="ir.actions.act_window">
+        <field name="name">View Estimation</field>
+        <field name="res_model">estimation.model</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_estimation_popup_form"/>
+        <field name="target">new</field>
+    </record>
+
+
+    <menuitem id="menu_product_specification_root" name="Estimations" sequence="10" action="action_view_product_specification" groups="psi_engineering.group_estimator,psi_engineering.group_md,psi_engineering.group_project_cordinator,psi_engineering.group_project_manager,psi_engineering.group_project_engineer" />
+
+    <menuitem id="menu_product_specification"
+              name="Draft Estimations"
+              parent="menu_product_specification_root"
+              action="action_view_product_specification"
+              sequence="1" />
+
+    <menuitem id="menu_submitted_product_specification"
+              name="Submitted Estimations"
+              parent="menu_product_specification_root"
+              action="action_view_submitted_product_specification"
+              sequence="2" />
+
+    <menuitem id="menu_approved_product_specification"
+              name="Approved Estimations"
+              parent="menu_product_specification_root"
+              action="action_view_approved_product_specification"
+              sequence="3" />
+
+    <menuitem id="menu_rejected_product_specification"
+              name="Rejected Estimations"
+              parent="menu_product_specification_root"
+              action="action_view_rejected_product_specification"
+              sequence="4" />
+
+
+</odoo>

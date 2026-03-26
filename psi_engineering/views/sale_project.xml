@@ -1,0 +1,261 @@
+<odoo>
+  <data> 
+
+    <record id="view_sale_order_form_inherit_cash_request" model="ir.ui.view">
+      <field name="name">sale.order.form.inherit.cash.request</field>
+      <field name="model">sale.order</field>
+      <field name="inherit_id" ref="sale.view_order_form"/>
+      <!-- Reference the sale order form view -->
+      <field name="arch" type="xml">
+        <xpath expr="//div[@name='button_box']" position="inside">
+          <button type="object" name="action_view_cash_requests" icon="fa-money" invisible="cash_request_count ==  0" class="oe_stat_button">
+            <field name="cash_request_count" widget="statinfo" string="Cash Requisitions"/>
+          </button>
+
+          <button type="object" name="action_view_purchase_requests" icon="fa-book" invisible="purchase_request_count ==  0" class="oe_stat_button">
+            <field name="purchase_request_count" widget="statinfo" string="Purchase Requisitions"/>
+          </button>
+
+          <button type="object" name="action_view_item_requests" icon="fa-truck" invisible="item_request_count ==  0" class="oe_stat_button">
+            <field name="item_request_count" widget="statinfo" string="Item Requisitions"/>
+          </button>
+        </xpath>
+         <xpath expr="//group/group/field[@name='partner_id']" position="attributes">
+                <attribute name="domain">[('is_customer','=',True),]</attribute>
+            </xpath>
+
+
+      </field>
+    </record>
+
+
+
+    <record id="view_task_form_inherit_cash_request" model="ir.ui.view">
+      <field name="name">task.form.inherit.cash.request</field>
+      <field name="model">project.task</field>
+      <field name="inherit_id" ref="project.view_task_form2"/>
+      <!-- Reference the task form view -->
+      <field name="arch" type="xml">
+        <xpath expr="//div[@class='oe_button_box']" position="inside">
+          <button type="object" name="action_view_cash_requests" icon="fa-money" invisible="1" class="oe_stat_button">
+            <field name="cash_request_count" widget="statinfo" string="Cash Requisitions"/>
+          </button>
+
+          <button type="object" name="action_view_purchase_requests" icon="fa-book" invisible="1" class="oe_stat_button">
+            <field name="purchase_request_count" widget="statinfo" string="Purchase Requisitions"/>
+          </button>
+
+          <button type="object" name="action_view_purchase_orders" icon="fa-book" invisible="0" class="oe_stat_button">
+            <field name="purchase_order_count" widget="statinfo" string="Purchase Orders"/>
+          </button>
+
+          <button type="object" name="action_view_item_requests" icon="fa-truck" invisible="1" class="oe_stat_button">
+            <field name="item_request_count" widget="statinfo" string="Material Internal Pickups"/>
+          </button>
+        </xpath>
+
+        <xpath expr="//group/group/field[@name='tag_ids']" position="before">
+            <field name="is_milestone"/>
+            <field name="milestone_template_id" />
+            <field name="attachment_ids" widget="many2many_binary"/>
+        </xpath>
+        <xpath expr="//group/group/field[@name='tag_ids']" position="after">
+            <field name="checklist_completed" invisible="1"/>
+            <button name="action_redirect_to_website_form" string="Fill Milestone Checklist on Website" type="object" class="oe_highlight" invisible="checklist_completed"/>
+        </xpath>
+
+        <xpath expr="//header" position="inside">
+
+          <button name="action_create_cash_request" type="object" string="Create Cash Request" invisible="1" class="oe_highlight"/>
+
+          <button name="action_create_item_request" type="object" string="Create Material Request" invisible="1" class="oe_highlight"/>
+
+          <button name="action_create_purchase_request" type="object" string="Create Purchase Request" invisible="1" class="oe_highlight"/>
+          <button name="action_create_purchase_order" type="object" string="Create Purchase Order" invisible="0" class="oe_highlight"/>
+          
+        </xpath>
+        <xpath expr="//notebook" position="inside">
+
+          <!-- <page string="Materials">
+
+            <field name="material_ids" invisible="parent_id != False" context="{'default_task_id':id,'default_parent_task_id':id}">
+              <list editable="bottom">
+                <field name="product_id" options="{'no_create':1,'no_create_edit':1,'no_quick_create':1}"/>
+                <field name="quantity"/>
+                <field name="uom_id"/>
+                <field name="unit_price"/>
+                <field name="task_id" column_invisible="0" readonly="1" force_save="1"/>
+                <field name="parent_task_id" column_invisible="1"/>
+                <field name="currency_id"/>
+                <field name="total_cost" readonly="1"/>
+              </list>
+              <form string="Material">
+                <group>
+                  <field name="product_id" options="{'no_create':1,'no_create_edit':1,'no_quick_create':1}"/>
+                  <field name="quantity"/>
+                  <field name="uom_id"/>
+                  <field name="unit_price"/>
+                  <field name="currency_id"/>
+                  <field name="total_cost" readonly="1"/>
+                </group>
+              </form>
+            </field>
+
+            <field name="material_child_ids" invisible="parent_id == False" context="{'default_task_id':id,'default_parent_task_id':parent_id}">
+              <list editable="bottom">
+                <field name="product_id" options="{'no_create':1,'no_create_edit':1,'no_quick_create':1}"/>
+                <field name="quantity"/>
+                <field name="uom_id"/>
+                <field name="unit_price"/>
+                <field name="task_id" column_invisible="1"/>
+                <field name="parent_task_id" column_invisible="1"/>
+                <field name="currency_id"/>
+                <field name="total_cost" readonly="1"/>
+              </list>
+              <form string="Material">
+                <group>
+                  <field name="product_id" options="{'no_create':1,'no_create_edit':1,'no_quick_create':1}"/>
+                  <field name="quantity"/>
+                  <field name="uom_id"/>
+                  <field name="unit_price"/>
+                  <field name="currency_id"/>
+                  <field name="total_cost" readonly="1"/>
+                </group>
+              </form>
+            </field>
+            <group>
+              <field name="total_material_cost" readonly="1" force_save="1"/>
+            </group>
+          </page>
+          <page name="labour costs" string="Labour Costs">
+            <field name="labour_ids" invisible="parent_id == False" context="{'default_task_id':id,'default_parent_task_id':id,}">
+              <list editable="bottom">
+                <field name="name"/>
+                <field name="number_of_people"/>
+                <field name="rate_per_day"/>
+                <field name="number_of_days"/>
+                <field name="task_id" column_invisible="0" readonly="1" force_save="1"/>
+                <field name="parent_task_id" column_invisible="1"/>
+                <field name="total_cost" readonly="1"/>
+              </list>
+              <form string="Labour">
+                <group>
+                  <field name="project_id" readonly="1" invisible="1" />
+                  <field name="number_of_people"/>
+                  <field name="rate_per_day"/>
+                  <field name="number_of_days"/>
+                  <field name="total_cost" readonly="1"/>
+                </group>
+              </form>
+            </field>
+
+            <field name="labour_child_ids" invisible="parent_id != False" context="{'default_task_id':id,'default_parent_task_id':parent_id}">
+              <list editable="bottom">
+                <field name="name"/>
+                <field name="task_id" column_invisible="0"/>
+                <field name="parent_task_id" column_invisible="0"/>
+                <field name="number_of_people"/>
+                <field name="rate_per_day"/>
+                <field name="number_of_days"/>
+                <field name="total_cost" readonly="1"/>
+              </list>
+              <form string="Labour">
+                <group>
+                  <field name="project_id" readonly="1" invisible="1" />
+                  <field name="number_of_people"/>
+                  <field name="rate_per_day"/>
+                  <field name="number_of_days"/>
+                  <field name="total_cost" readonly="1"/>
+                </group>
+              </form>
+            </field>
+
+            <group>
+              <field name="total_labour_cost" readonly="1"/>
+            </group>
+          </page>
+          <page string="Over Head Costs">
+            <field name="overhead_ids" invisible="parent_id == False" context="{'default_task_id':id,'default_parent_task_id':id,}">
+              <list editable="bottom">
+                <field name="description"/>
+                <field name="task_id" column_invisible="0" readonly="1" force_save="1"/>
+                <field name="parent_task_id" column_invisible="1"/>
+                <field name="amount"/>
+              </list>
+              <form string="Overhead">
+                <group>
+                  <field name="description"/>
+                  <field name="amount"/>
+                </group>
+              </form>
+            </field>
+            <field name="overhead_child_ids" invisible="parent_id != False" context="{'default_task_id':id,'default_parent_task_id':parent_id,}">
+              <list editable="bottom">
+                <field name="description"/>
+                <field name="task_id" column_invisible="1"/>
+                <field name="parent_task_id" column_invisible="1"/>
+                <field name="amount"/>
+              </list>
+              <form string="Overhead">
+                <group>
+                  <field name="description"/>
+                  <field name="amount"/>
+                </group>
+              </form>
+            </field>
+            <group>
+              <field name="total_overhead_cost" readonly="1"/>
+            </group>
+          </page>
+          <page string="Total Costs Summary">
+            <group>
+              <group>
+                <field name="total_material_cost" readonly="1" string="Total Material Costs"/>
+                <field name="total_labour_cost" readonly="1" string="Total Labour Costs"/>
+                <field name="total_overhead_cost" readonly="1" string="Total Overhead Costs"/>
+              </group>
+              <group>
+                <field name="total_estimated_cost" readonly="1" string="Total Estimated Costs"/>
+              </group>
+            </group>
+          </page> -->
+          <page name="Check List" string="Task Check List">
+              <field name="checklist_ids" widget="one2many_list" context="{'default_project_id':project_id,'default_project_type_id':project_type_id}">
+                  <list editable="bottom">
+                      <field name="display_type" column_invisible="1"/>
+                      <field name="project_id" column_invisible="1"/>
+                      <field name="milestone_template_id" column_invisible="1"/>
+                      <field name="project_type_id" column_invisible="1"/>
+                      <field name="no"/>
+                      <field name="name" widget="section_and_note_text"/>
+                      <field name="comments"/>
+                      <field name="answer_type"/>
+                      <field name="answer_pass_fail" invisible="answer_type !=  'pass_fail'"/>
+                      <field name="answer_number" invisible="answer_type !=  'number'"/>
+                      <field name="answer_text" invisible="answer_type !=  'text'"/>
+                      <field name="remarks"/>
+                  </list>
+              </field>
+
+          </page>
+          <page name="project_images" string="Milestone Images">
+            <field name="image_ids" readonly="0" string="Milestone Images" context="{'default_project_id':project_id}">
+              <list editable="bottom">
+                <field name="name"/>
+                <field name="project_id" column_invisible="1"/>
+                <field name="image" widget="image" required="1"/>
+              </list>
+            </field>
+          </page>
+
+        </xpath>
+      </field>
+    </record>
+
+
+
+
+
+
+  </data>
+</odoo>

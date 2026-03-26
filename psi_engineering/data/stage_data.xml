@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <data noupdate="1">
+
+        <record model="crm.stage" id="stage_lead_estimation">
+            <field name="name">Estimation</field>
+            <field name="fold" eval="False"/>
+            <field name="estimation_stage">True</field>
+            <field name="sequence">10</field>
+        </record>
+
+        <record model="crm.stage" id="stage_lead_progress">
+            <field name="name">Progress</field>
+            <field name="fold" eval="False"/>
+            <field name="progress_stage">True</field>
+            <field name="sequence">100</field>
+        </record>
+
+        <record model="crm.stage" id="stage_lead_closed">
+            <field name="name">Closed</field>
+            <field name="fold" eval="False"/>
+            <field name="closed">True</field>
+            <field name="sequence">110</field>
+        </record>
+
+        <record id="category_design_work" model="project.category">
+            <field name="name">Design Work</field>
+            <field name="description">Design Work</field>
+        </record>
+        <record id="category_project" model="project.category">
+            <field name="name">Project</field>
+            <field name="project">True</field>
+            <field name="description">Project</field>
+        </record>
+        <record id="category_supplies" model="project.category">
+            <field name="name">Supplies</field>
+            <field name="description">Supplies</field>
+        </record>
+
+        <record id="category_prequalification" model="project.category">
+            <field name="name">Pre Qualification</field>
+            <field name="no_quotation">True</field>
+            <field name="description">Supplies</field>
+        </record>
+
+    </data>
+
+
+</odoo>

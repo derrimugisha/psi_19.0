@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+
+    <record id="view_estimation_lead_wizard_form" model="ir.ui.view">
+        <field name="name">estimation.lead.wizard.form</field>
+        <field name="model">estimation.lead.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Assign Estimator">
+                <group>
+                    <field name="lead_id" readonly="1" force_save="1"/>
+                    <field name="estimator_id" options="{'no_create': True}" required="1"/>
+                    <field name="estimation_due_date" required="1"/>
+                </group>
+                <footer>
+                    <button string="Assign Estimator" type="object" name="assign_estimator" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_purchase_order_reject_wizard" model="ir.ui.view">
+        <field name="name">purchase.order.reject.wizard.form</field>
+        <field name="model">purchase.order.reject.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Reject Purchase Order">
+                <group>
+                    <field name="reject_reason"/>
+                </group>
+                <footer>
+                    <button name="action_confirm_reject" type="object" string="Reject" class="btn btn-danger"/>
+                    <button string="Cancel" class="btn btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+
+    <record id="view_account_payment_register_form_inherit" model="ir.ui.view">
+            <field name="name">account.payment.register.form.inherit</field>
+            <field name="model">account.payment.register</field>
+            <field name="inherit_id" ref="account.view_account_payment_register_form"/>
+            <field name="arch" type="xml">
+                <field name="partner_bank_id" position="after">
+                    <field name="analytic_account_id"/>
+                    
+                    <field name="wht_tax_id" invisible="payment_type != 'outbound'"/>
+                    <field name="amount_untaxed" invisible="1"/>
+                    <field name="withholding_amount_to_pay" invisible="1"/>
+                    
+                </field>
+
+                <xpath expr="//field[@name='payment_date']" position="before">
+                    <field name="payment_type" invisible="1"/>
+                    <field name="wht_amount" invisible="payment_type != 'outbound'" readonly="1" force_save="1"/>
+                    <field name="actual_amount" invisible="payment_type != 'outbound'" readonly="1" force_save="1" />
+                    
+                </xpath>
+            </field>
+        </record>
+
+
+
+</odoo>

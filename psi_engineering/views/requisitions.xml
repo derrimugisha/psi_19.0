@@ -1,0 +1,436 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_po_request_form_inherit" model="ir.ui.view">
+        <field name="name">purchase.request.form.inherit</field>
+        <field name="model">po.requisition</field>
+        <field name="inherit_id" ref="requisitions.po_requisition_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='name']" position='attributes'>
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//form/sheet/div/div[@class='oe_title']/h1/field[@name='name']" position='before'>
+                <h1>
+                    <field name="pr_sequence" readonly="1"/>
+                </h1>
+            </xpath>
+            <xpath expr="//form/header/button[@name='submit_btn']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//form/header/button[@name='submit_btn']" position="after">
+            <button name="submit_order" type="object" string="Submit" class="btn-primary" invisible="state != 'draft'"/>
+                
+            </xpath>
+            <xpath expr="//form/header/button[@name='submit_for_approval']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//form/header/button[@name='submit_order']" position="after">
+                <button name="pm_approval" type="object" string="Approve" class="btn-primary" invisible="state != 'submitted'" />
+            </xpath> 
+            <xpath expr="//form/header/button[@name='pm_approval']" position="after">
+                <button name="btn_proc_approval" type="object" string="Approve" class="btn-primary" invisible="state != 'procurement_approved'" groups="psi_engineering.group_procurement"/>
+            </xpath> 
+            <xpath expr="//form/header/button[@name='action_finance_approved']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//form/header/button[@name='btn_proc_approval']" position="after">
+                <button name="submit_md_approval" type="object" string="Approve" class="btn-primary" invisible="state != 'finance_approved'" groups="psi_engineering.group_finance"/>
+            </xpath>
+            <xpath expr="//form/header/button[@name='action_approve_po_requisition']" position="attributes">
+                <attribute name="invisible">state not in ['approved']</attribute>
+            </xpath>
+
+            <xpath expr="//header" position="inside">
+                <button name="btn_md_approval" type="object" string="Approve" class="oe_highlight" invisible="state != 'md_approval'" groups="psi_engineering.group_md"/>
+                <button name="action_reject" type="object" string="Reject" class="btn-danger" invisible="state not in ['submitted', 'procurement_approved','finance_approved', 'md_approval']" groups="psi_engineering.group_md,psi_engineering.group_finance,psi_engineering.group_procurement"/>
+                <button name="cancel_order" type="object" string="Cancel" class="btn-secondary" invisible="state not in ['draft','procurement_approved', 'submitted', 'finance_approved', 'md_approval', 'approved']" groups="psi_engineering.group_md,psi_engineering.group_finance,psi_engineering.group_procurement,psi_engineering.group_project_manager"/>
+                <button name="reset_draft" type="object" string="Reset Draft" class="btn-secondary" invisible="state not in ['cancel','submitted','procurement_approved', 'finance_approved', 'md_approval', 'approved']"/>
+            </xpath>
+
+            <xpath expr="//form/header/field[@name='state']" position="replace">
+                <field name="state" widget="statusbar" statusbar_visible="draft,submitted,procurement_approved,finance_approved,md_approval,approved,done,rejected,cancel"/>
+            </xpath>
+
+            <xpath expr="//field[@name='user']" position="after">
+                <field name="project_id"/>
+                <field name="destination_location_id"/>
+                <field name="budget_id"/>
+                <field name="project_manager_id"/>
+                <field name="partner_ref"/>
+                <field name="department_id" invisible="1"/>
+                <field name="employee_manager_id" invisible="1"/>
+                <field name="can_approve" invisible="1" readonly="0"/>
+
+            </xpath>
+
+            <xpath expr="//notebook" position="inside">
+                <page name="project_details" string="Purchase Requisition Details">
+                    <group>
+                        <field name="reject_reason" invisible ="state != 'rejected'"/>
+                        <field name="partner_id" readonly="1" force_save="1"/>
+                        <field name="project_id" readonly="1" force_save="1"/>
+                        <field name="task_id" readonly="1" force_save="1" invisible="1"/>
+                        <field name="budget_id" readonly="1" force_save="1"/>
+                        <field name="sub_task_id" readonly="1" force_save="1" invisible="1"/>
+                        <field name="sale_order_id" readonly="1" force_save="1"/>
+                        <field name="sale_order_line_id" readonly="1" force_save="1"/>
+                    </group>
+                </page>
+            </xpath>
+
+            <xpath expr="//notebook/page/field[@name='order_line']/list/field[@name='product_id']" position="attributes">
+                <attribute name="domain">product_domain</attribute>
+            </xpath>
+            <xpath expr="//notebook/page/field[@name='order_line']/list" position="attributes">
+                <attribute name="decoration-danger"> show_budget_warning == True</attribute>
+            </xpath>
+
+            <xpath expr="//notebook/page/field[@name='order_line']/list/field[@name='product_id']" position="before">
+                <field name="project_id" column_invisible="1"/>
+                <field name="product_domain" column_invisible="1"/>
+                <field name="show_budget_warning" column_invisible="1"/>
+                <field name="budget_id" column_invisible="1"/>
+                <field name="budget_line_id" domain="[('budget_analytic_id','=',parent.budget_id)]"/>
+                <field name="analytic_account_id" column_invisible="1"/>
+            </xpath>
+
+            <xpath expr="//notebook/page/field[@name='order_line2']/list/field[@name='product_id']" position="before">
+                <field name="project_id" column_invisible="1"/>
+                <field name="budget_id" column_invisible="1"/>
+                <field name="budget_line_id" domain="[('budget_analytic_id','=',parent.budget_id)]"/>
+                <field name="analytic_account_id" column_invisible="1"/>
+            </xpath>
+            <!-- <field expr="//notebook/page/field[@name='order_line2']" position="attributes">
+                <attribute name="readonly">state not in ('draft','submitted','finance_approved','approved','procurement_approved')</attribute>
+            </field> -->
+            <xpath expr="//field[@name='order_line']" position="attributes">
+                <attribute name="invisible">state not in ['draft']</attribute>
+            </xpath>
+            <xpath expr="//notebook/page/field[@name='order_line2']/list/field[@name='price_unit']" position="attributes">
+                <attribute name="groups">requisitions.purchase_group_manager,psi_engineering.group_procurement</attribute>
+            </xpath>
+            <!-- <xpath expr="//sheet" position="inside">
+                <div class="oe_chatter">
+                    <field name="activity_ids" widget="mail_activity"/>
+                </div>
+            </xpath> -->
+        </field>
+    </record>
+
+    <record id="requisitions_po_requisition_list" model="ir.ui.view">
+        <field name="name">purchase.requisition.list.inherit</field>
+        <field name="model">po.requisition</field>
+        <field name="inherit_id" ref="requisitions.po_requisition_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//list//field[@name='name']" position="replace">
+                <field name="pr_sequence" readonly="1"/>
+            </xpath>
+            <xpath expr="//list//field[@name='pr_sequence']" position="after">
+                <field name="partner_ref"/>
+            </xpath>
+            
+        </field>
+    </record>
+
+    <record id="view_item_requisition_tree_inherit" model="ir.ui.view">
+        <field name="name">item.requisition.list.inherit</field>
+        <field name="model">item.requisition</field>
+        <field name="inherit_id" ref="requisitions.item_requisition_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='id']" position="attributes">
+                <attribute name="column_invisible">1</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='warehouse_id']" position="replace">
+                <field name="project_id" string="Project ID" />
+            </xpath>
+        </field>
+    </record>
+
+    <!-- <record id="view_cash_request_form_inherit" model="ir.ui.view">
+        <field name="name">cash.request.form.inherit</field>
+        <field name="model">cash.request</field>
+        <field name="inherit_id" ref="requisitions.cash_requisition_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="cash_request2" type="object" string="Cash Out" class="oe_highlight" invisible="state not in ['cash_out']"/>
+                <button name="open_expense_type_wizard" type="object" string="Reconcile Requisition" class="oe_highlight" invisible="state not in ['done']"/>
+            </xpath>
+            <xpath expr="//header/button[@name='btn_mv_submitted']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//form/header/button[@name='btn_mv_submitted']" position="after">
+                <button confirm="Are you sure you want to Submit this Requsition?" name="btn_mv_submitted1" invisible="state != 'draft'" string="Submit Request" type="object" class="oe_highlight" />
+                <button confirm="Are you sure you want to Approve this Requsition?" name="submit_finance" invisible="state != 'submitted'" groups="psi_engineering.group_department_manager" string="Approve Request" type="object" class="oe_highlight" />
+                <button confirm="Are you sure you want to Approve this Requsition?" name="approve_finance" invisible="state != 'finance' " string="Approve Request" groups="psi_engineering.cash_group_finance" type="object" class="oe_highlight" />
+                <button name="btn_md_approval" confirm="Are you sure you want to Approve this Requsition?" type="object" string="Approve Requisition" invisible="state not in ['md_approval']" groups="psi_engineering.group_md"/>
+            </xpath>
+           
+            <xpath expr="//form/header/field[@name='state']" position="replace">
+                <field name="state" widget="statusbar" statusbar_visible="draft,submitted,finance,md_approval,cash_out,done,reject,cancel"/>
+            </xpath>
+
+
+
+            <xpath expr="//form/header/button[@name='approve_request']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <xpath expr="//form/header/button[@name='reject_request']" position="replace">
+                <button name="reject_request" type="object" string="Reject Request" invisible="state not in ['submitted','finance','md_approval']" confirm="Are you sure you want to reject this cash request?" groups="psi_engineering.group_md"/>
+            </xpath>
+
+            <xpath expr="//button[@type='action']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//header/button[@name='cash_request']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='user']" position="after">
+                <field name="lead_id"/>
+                <field name="employee_threshold"/>
+                <field name="department_id"/>
+                <field name="employee_manager_id" invisible="1"/>
+                <field name="can_approve" invisible="1" readonly="0"/>
+                <field name="liquidity_transfer" invisible="1" />
+
+            </xpath>
+
+            <xpath expr="//notebook" position="inside">
+                <page name="project_details" string="Project Details">
+                    <group>
+                        <field name="partner_id" readonly="1" force_save="1"/>
+                        <field name="project_id" readonly="1" force_save="1"/>
+                        <field name="budget_id" readonly="1" force_save="1"/>
+                        <field name="task_id" readonly="1" force_save="1" invisible="1"/>
+                        <field name="sub_task_id" readonly="1" force_save="1" invisible="1"/>
+                        <field name="sale_order_id" readonly="1" force_save="1"/>
+                        <field name="sale_order_line_id" readonly="1" force_save="1"/>
+                    </group>
+                </page>
+            </xpath>
+            <xpath expr="//group/group[1]" position="inside">
+                <field name="employee_id" />
+                <field name="employee_journal_id" invisible="1"/>
+            </xpath>
+            <xpath expr="//group/group[2]" position="inside">
+                <field name="journal_id"/>
+                <field name="employee_journal_id" invisible="0" readonly="1"/>
+                <field name="project_id" invisible="lead_id != False" readonly="0" force_save="1"/>
+                <field name="budget_id" invisible="lead_id != False" readonly="0" force_save="1"/>
+
+            </xpath>
+            <xpath expr="//notebook/page/field[@name='line_ids']/list/field[@name='item']" position="before">
+                <field name="product_id" options="{'no_create':1,'no_create_edit':1,'no_quick_create':1}"/>
+                <field name="project_id" column_invisible="1" />
+                <field name="budget_id" column_invisible="1"/>
+                <field name="budget_line_id" domain="[('budget_analytic_id','=',parent.budget_id)]" column_invisible="parent.lead_id != False"/>
+                <field name="analytic_account_id" column_invisible="1"/>
+            </xpath>
+
+            <xpath expr="//notebook/page/field[@name='line_ids']/list/field[@name='total_price']" position="after">
+                <field name="remaining_budget" column_invisible="1"/>
+            </xpath>
+
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_view_moves" type="object" invisible="move_count == 0" class="oe_stat_button" icon="fa-money">
+                    <field name="move_count" widget="statinfo" string="Journal Entries"/>
+                </button>
+                <button name="action_view_purchase_receipts" type="object" class="oe_stat_button" invisible="purchase_receipt_count == 0" icon="fa-file">
+                    <field name="purchase_receipt_count" widget="statinfo" string="Purchase Receipts"/>
+                </button>
+
+                <button name="action_view_vendor_bills" type="object" class="oe_stat_button" invisible="vendor_bill_count == 0" icon="fa-file-invoice-dollar">
+                    <field name="vendor_bill_count" widget="statinfo" string="Vendor Bills"/>
+                </button>
+            </xpath>
+        </field>
+    </record> -->
+
+    <record id="view_expense_type_wizard_form" model="ir.ui.view">
+        <field name="name">expense.type.wizard.form</field>
+        <field name="model">expense.type.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Select Expense Type">
+                <group>
+                    <field name="expense_type"/>
+                    <field name="cash_requisition_id" readonly="1" force_save="1"/>
+                </group>
+                <footer>
+                    <button string="Confirm" type="object" name="action_confirm" class="oe_highlight"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+
+    <!-- <record id="cash_request_tree" model="ir.ui.view">
+        <field name="name">cash_request.list</field>
+        <field name="model">cash.request</field>
+        <field name="inherit_id" ref="requisitions.footstep_cash_requisition_list" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='date']" position="after">
+                <field name="project_id"/>
+                <field name="budget_id"/>
+            </xpath>
+        </field>
+    </record> -->
+
+    <record id="view_item_requisition_form_inherit" model="ir.ui.view">
+        <field name="name">item.requisition.form.inherit</field>
+        <field name="model">item.requisition</field>
+        <field name="inherit_id" ref="requisitions.item_requisition_form"/>
+        <field name="arch" type="xml">
+
+
+            <xpath expr="//form/header/button[@name='submit_for_approval']" position="after">
+                <button confirm="Are you sure you want to approve this requisition?" name="approve" type="object" string="Project Coordinator/Manager/Engineer Approval" class="oe_highlight" invisible="state != 'submitted'" groups="psi_engineering.group_project_manager,psi_engineering.group_project_cordinator,psi_engineering.group_project_engineer"/>
+            </xpath>
+            <xpath expr="//form/header/button[@name='approve']" position="after">
+                <button confirm="Are you sure you want to reject this requisition" name="reject_btn" type="object" string="Reject" class="oe_highlight" invisible="state != 'submitted'" groups="psi_engineering.group_project_manager,psi_engineering.group_project_cordinator,psi_engineering.group_project_engineer"/>
+            </xpath>
+
+            <xpath expr="//form/header/button[@name='approve']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <xpath expr="//form/header/button[@name='action_approve_item_requisition']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <xpath expr="//form/header/button[@name='submit_for_approval']" position="after">
+                <button confirm="Are you sure you want to approve this requisition" name="md_approve" type="object" string="Approve" class="oe_highlight" invisible="state != 'md_approval'" groups="psi_engineering.group_md"/>
+            </xpath>
+            <xpath expr="//form/header/button[@name='md_approve']" position="after">
+                <button confirm="Are you sure you want to reject this requisition" name="reject_btn" type="object" string="Reject" class="oe_highlight" invisible="state != 'md_approval'" groups="psi_engineering.group_md"/>
+            </xpath>
+
+            <xpath expr="//form/header/button[@name='approve']" position="after">
+                <button confirm="Are you sure you want to issue these items?" name="action_approve_item_requisition" type="object" string="Issue Items" class="oe_highlight" invisible="state != 'approved'" groups="psi_engineering.group_storekeeper"/>
+
+            </xpath>
+
+
+
+
+        </field>
+    </record>
+
+    <record id="item_requisition_form_inherit" model="ir.ui.view">
+        <field name="name">item.requisition.form.inherited</field>
+        <field name="model">item.requisition</field>
+        <field name="inherit_id" ref="requisitions.item_requisition_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook/page/field[@name='order_line']/list/field[@name='product_uom']" position="after">
+                <field name="cost" column_invisible="1"/>
+                <field name="cost_subtotal" column_invisible="1" sum="Total Cost"/>
+                <field name="price_unit" column_invisible="1"/>
+                <field name="price_subtotal" column_invisible="1" sum="Total Sales Price"/>
+            </xpath>
+            <xpath expr="//notebook/page/field[@name='order_line']/list/field[@name='product_id']" position="attributes">
+                <attribute name="options">{'no_create_edit': True,  'no_create': True}</attribute>
+            </xpath>
+
+            <xpath expr="//notebook/page/field[@name='order_line']/list/field[@name='product_id']" position="after">
+                <field name="project_id" column_invisible="1"/>
+                <field name="budget_id" column_invisible="1"/>
+                <field name="budget_line_id" options="{'no_create_edit': True,  'no_create': True}" domain="[('budget_analytic_id','=',parent.budget_id)]"/>
+                <field name="analytic_account_id" column_invisible="1"/>
+            </xpath>
+            <xpath expr="//notebook/page/field[@name='order_line']/list/field[@name='product_uom']" position="after">
+                <field name="remaining_quantity" />
+            </xpath>
+
+            <xpath expr="//group/group/field[@name='delivery_date']" position="after">
+                <field name="project_id" required="compute_required != True" />
+                <field name="budget_id" required="compute_required != True" />
+                <field name="picking_type_id" invisible="1"/>
+                <field name="compute_required" invisible="1"/>
+                <field name="vehicle_id" readonly="1"/>
+            </xpath>
+
+            <xpath expr="//notebook" position="inside">
+                <page name="project_details" string="Project Details">
+                    <group>
+                        <field name="partner_id" readonly="1" force_save="1"/>
+                        <field name="project_id" readonly="1" force_save="1"/>
+                        <field name="task_id" readonly="1" force_save="1" invisible="1"/>
+                        <field name="budget_id" readonly="1" force_save="1"/>
+                        <field name="sub_task_id" readonly="1" force_save="1" invisible="1"/>
+                        <field name="sale_order_id" readonly="1" force_save="1"/>
+                        <field name="sale_order_line_id" readonly="1" force_save="1"/>
+                    </group>
+                </page>
+            </xpath>
+            <xpath expr="//form/header/field[@name='state']" position="replace">
+                <field name="state" widget="statusbar" statusbar_visible="draft,submitted,md_approval,approved,done"/>
+            </xpath>
+        </field>
+    </record>
+
+
+    <!-- <record id="view_transfer_request_form" model="ir.ui.view">
+        <field name="name">view_transfer_request.form</field>
+        <field name="model">cash.request</field>
+        <field name="arch" type="xml">
+            <form string="">
+                <header>
+                    <button confirm="Are you sure you want to Submit this Transfer Request?" name="btn_mv_submitted1" invisible="state != 'draft'" string="Submit Request" type="object" class="oe_highlight" />
+                    <button confirm="Are you sure you want to Approve this Transfer Request?" name="submit_finance" invisible="state != 'submitted'" groups="psi_engineering.group_department_manager" string="Approve Request" type="object" class="oe_highlight" />
+                    <button confirm="Are you sure you want to Approve this Transfer Request" name="approve_finance" invisible="state != 'finance' " string="Approve Request" groups="psi_engineering.cash_group_finance" type="object" class="oe_highlight" />
+                    <button name="btn_md_approval" confirm="Are you sure you want to Approve this Requsition?" type="object" string="Approve Requisition" invisible="state not in ['md_approval']" groups="psi_engineering.group_md"/>
+                    <button name="cash_request2" type="object" string="Transfer Cash" invisible="state not in ['cash_out']" groups="psi_engineering.cash_group_finance"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    
+                    <div class="oe_button_box" name="button_box">
+                         <button name="action_view_moves" type="object" invisible="move_count == 0" class="oe_stat_button" icon="fa-money">
+                        <field name="move_count" widget="statinfo" string="Journal Entries"/>
+                    </button>
+                    </div>
+                   
+                    
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="employee_id"/>
+                            <field name="purchase_order_id" readonly="1" force_save="1"/>
+                            <field name="employee_journal_id"/>
+                        </group>
+                        <group>
+                            <field name="project_id" force_save="1" readonly="1"/>
+                            <field name="budget_id" force_save="1" readonly="1"/>
+                            <field name="amount_requested" readonly="state not in ['draft']" invisible="purchase_order_id == False"/>
+                            <field name="amount" readonly="state not in ['draft']" invisible="purchase_order_id != False" />
+                            <field name="journal_id"/>
+                        </group>
+                    </group>
+                    <group invisible="purchase_order_id != False">
+                        <field name="cash_line_ids" readonly="1">
+                            <list>
+                                <field name="product_id" readonly="0"/>
+                                <field name="item" />
+                                <field name="budget_line_id"/>
+                                <field name="qty"/>
+                                <field name="unit_price"/>
+                                <field name="total_price"/>
+                                <field name="remaining_budget"/>
+
+                            </list>
+                        </field>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record> -->
+
+
+
+
+</odoo>

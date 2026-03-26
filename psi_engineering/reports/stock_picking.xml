@@ -1,0 +1,39 @@
+<odoo>
+    <data>
+        <template id="report_picking_inherit" inherit_id="stock.report_picking">
+            <xpath expr="//div[@class='page o_report_stockpicking_operations']/div[@class='oe_structure'][last()]" position="after">
+                <div class="col-6">
+                    <!-- <div class="row">
+                        <div class="col"><span t-field="o.uom_quantities"/></div>
+                    </div> -->
+                    <br/>
+                    <br/>
+                    <div class="row">
+                        <div class="col">Sender Signature : </div>
+                        <div class="col">Receiver Signature : </div>
+                    </div>
+                    <br/>
+                    <div class="row">
+                        <div class="col">__________________ </div>
+                        <div class="col">__________________ </div>
+                    </div>
+                     <br/>
+                    <div class="row">
+                        <div class="col">__________________ </div>
+                        <div class="col">__________________ </div>
+                    </div>
+                    <br/>
+                    <!--<div class="row">
+                        <div class="col">__________________  </div>
+                        <div class="col">__________________ </div>
+                    </div>
+                    <br/>
+                    <div class="row">
+                        <div class="col"></div>
+                        <div class="col">___________________ </div>
+                    </div> -->
+                </div>
+            </xpath>
+        </template>
+    </data>
+</odoo>

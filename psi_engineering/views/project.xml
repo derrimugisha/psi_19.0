@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_project_type_tree" model="ir.ui.view">
+        <field name="name">project.type.list</field>
+        <field name="model">project.type</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_project_type_form" model="ir.ui.view">
+        <field name="name">project.type.form</field>
+        <field name="model">project.type</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" string="Project Type Name"/>
+                        <h1>
+                            <field name="name" readonly="0"/>
+                        </h1>
+                    </div>
+                    <group>
+
+                        <field name="milestone_template_ids">
+                            <list>
+                                <field name="name"/>
+                            </list>
+                        </field>
+                    </group>
+                </sheet>
+                <chatter/>
+
+            </form>
+        </field>
+    </record>
+
+    <record id="view_project_milestone_template_form" model="ir.ui.view">
+        <field name="name">project.milestone.template.form</field>
+        <field name="model">project.milestone.template</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_title">
+
+                        <h1>
+                            <field name="name" readonly="0"/>
+                        </h1>
+                    </div>
+                    <group>
+
+                        <field name="project_type_id" invisible="1"/>
+                        <field name="milestone_item_ids" widget="one2many_list">
+                            <list editable="bottom">
+                                <control>
+                                    <create name="add_item_control" string="Add a Milestone Item"/>
+                                    <create name="add_section_control" string="Add a Section" context="{'default_display_type': 'line_section'}"/>
+                                    <!-- <create name="add_note_control" string="Add a Note" context="{'default_display_type': 'line_note'}"/> -->
+                                </control>
+
+                                <field name="display_type" column_invisible="1"/>
+                                <field name="no" required="1"/>
+                                <field name="name" widget="section_and_note_text"/>
+                                <field name="answer_type" invisible="display_type != False"/>
+                                <field name="comments" invisible="display_type != False"/>
+                            </list>
+                        </field>
+                    </group>
+                </sheet>
+                <!-- <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div> -->
+            </form>
+        </field>
+    </record>
+    <record id="view_project_milestone_item_tree" model="ir.ui.view">
+        <field name="name">project.milestone.item.list</field>
+        <field name="model">project.milestone.item</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="answer_type"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_project_milestone_item_form" model="ir.ui.view">
+        <field name="name">project.milestone.item.form</field>
+        <field name="model">project.milestone.item</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="answer_type"/>
+                        <field name="comments"/>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_project_milestone_form_inherit" model="ir.ui.view">
+        <field name="name">project.milestone.form.inherit</field>
+        <field name="model">project.milestone</field>
+        <field name="inherit_id" ref="project.project_milestone_view_form"/>
+        <field name="arch" type="xml">
+            <!-- <xpath expr="//group/group/field[@name='is_reached']" position="before">
+                <field name="project_type_id" invisible="0"/>
+                <field name="milestone_template_id" />
+                <field name="attachment_ids" widget="many2many_binary"/>
+            </xpath>
+            <xpath expr="//group/group/field[@name='is_reached']" position="after">
+                <field name="checklist_completed" invisible="1"/>
+                <button name="action_redirect_to_website_form" string="Fill Milestone Checklist on Website" type="object" class="oe_highlight" invisible="checklist_completed"/>
+            </xpath> -->
+
+            <xpath expr="//form/sheet" position="before">
+                <header>
+                    <button name="action_start" type="object" string="Start" class="oe_highlight" invisible="state !=  'draft'"/>
+                    <button name="action_complete" type="object" string="Complete" class="oe_highlight" invisible="state !=  'in_progress'"/>
+                    <!-- <button name="action_cancel" type="object" string="Cancel" class="oe_highlight" invisible="state in ['completed', 'cancelled']"/> -->
+                    <!-- <button name="action_reset_to_draft" type="object" string="Reset to Draft" class="oe_highlight" invisible="state not in ['in_progress', 'completed', 'cancelled']"/> -->
+                    <field name="state" widget="statusbar" statusbar_visible="draft,in_progress,completed"/>
+                </header>
+
+            </xpath>
+            <!-- <xpath expr="//form" position="inside">
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="activity_ids" widget="mail_activity"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </xpath> -->
+            <!-- <xpath expr="//sheet" position="inside">
+                <notebook>
+                    <page name="Check List" string="Milestone Check List">
+                        <field name="checklist_ids" widget="one2many_list" context="{'default_project_id':project_id,'default_project_type_id':project_type_id}">
+                            <list editable="bottom">
+                                <field name="display_type" column_invisible="1"/>
+                                <field name="project_id" column_invisible="1"/>
+                                <field name="milestone_template_id" column_invisible="1"/>
+                                <field name="project_type_id" column_invisible="1"/>
+                                <field name="no"/>
+                                <field name="name" widget="section_and_note_text"/>
+                                <field name="comments"/>
+                                <field name="answer_type"/>
+                                <field name="answer_pass_fail" invisible="answer_type !=  'pass_fail'"/>
+                                <field name="answer_number" invisible="answer_type !=  'number'"/>
+                                <field name="answer_text" invisible="answer_type !=  'text'"/>
+                                <field name="remarks"/>
+                            </list>
+                        </field>
+
+                    </page>
+                    <page name="Milestone Images">
+                        <field name="image_ids" context="{'default_project_id':project_id,'default_project_type_id':project_type_id}">
+                            <list editable="bottom">
+                                <field name="name" required="1"/>
+                                <field name="project_id" column_invisible="1"/>
+                                <field name="project_type_id" column_invisible="1"/>
+                                <field name="image" widget="image" required="1"/>
+                            </list>
+                        </field>
+                    </page>
+
+                </notebook>
+
+            </xpath> -->
+
+
+        </field>
+    </record>
+
+    <record id="project_milestone_tree" model="ir.ui.view">
+        <field name="name">project.list</field>
+        <field name="model">project.milestone</field>
+        <field name="inherit_id" ref="project.project_milestone_view_tree" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='is_reached']" position="before">
+                <field name="project_type_id" column_invisible='1'/>
+                <field name="milestone_template_id"/>
+            </xpath>
+
+            <xpath expr="//field[@name='is_reached']" position="after">
+                <button name="view_milestone" type="object" string="View Milestone"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_project_milestone_checklist_tree" model="ir.ui.view">
+        <field name="name">project.milestone.checklist.list</field>
+        <field name="model">project.milestone.checklist</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="project_id"/>
+                <field name="milestone_id"/>
+                <field name="name"/>
+                <field name="display_type"/>
+                <field name="answer_type"/>
+                <field name="comments"/>
+                <field name="remarks"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_project_milestone_checklist_form" model="ir.ui.view">
+        <field name="name">project.milestone.checklist.form</field>
+        <field name="model">project.milestone.checklist</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="project_id"/>
+                        <field name="milestone_id"/>
+                        <field name="milestone_template_id"/>
+                        <field name="project_type_id"/>
+                        <field name="name"/>
+                        <field name="display_type"/>
+                    </group>
+
+                    <group>
+                        <field name="answer_type"/>
+                        <field name="answer_pass_fail" invisible="answer_type !=  'pass_fail'"/>
+                        <field name="answer_number" invisible="answer_type !=  'number'"/>
+                        <field name="answer_text" invisible="answer_type !=  'text'"/>
+                    </group>
+
+                    <group>
+                        <field name="comments"/>
+                        <field name="remarks"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+
+    <record id="view_project_milestone_images_tree" model="ir.ui.view">
+        <field name="name">project.milestone.images.list</field>
+        <field name="model">project.milestone.images</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="milestone_id"/>
+                <field name="project_id"/>
+                <field name="project_type_id"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_project_milestone_images_form" model="ir.ui.view">
+        <field name="name">project.milestone.images.form</field>
+        <field name="model">project.milestone.images</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="milestone_id"/>
+                        <field name="project_id"/>
+                        <field name="project_type_id"/>
+                        <field name="image" widget="image"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+
+    <record id="action_project_type" model="ir.actions.act_window">
+        <field name="name">Project Types</field>
+        <field name="res_model">project.type</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="action_project_milestone_template" model="ir.actions.act_window">
+        <field name="name">Milestone Templates</field>
+        <field name="res_model">project.milestone.template</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="action_project_milestone_item" model="ir.actions.act_window">
+        <field name="name">Milestone Items</field>
+        <field name="res_model">project.milestone.item</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="action_project_milestone_item" model="ir.actions.act_window">
+        <field name="name">Milestone Items</field>
+        <field name="res_model">project.milestone.item</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+
+    <menuitem id="menu_project_type_root" name="Project Configuration" parent="project.menu_project_config" sequence="10"/>
+    <menuitem id="menu_project_type" name="Project Types" parent="menu_project_type_root" action="action_project_type" sequence="1"/>
+    <menuitem id="menu_project_milestone_template" name="Milestone Templates" parent="menu_project_type_root" action="action_project_milestone_template" sequence="2"/>
+    <menuitem id="menu_project_milestone_item" name="Milestone Items" parent="menu_project_type_root" action="action_project_milestone_item" sequence="3"/>
+
+
+</odoo>

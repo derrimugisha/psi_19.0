@@ -1,0 +1,415 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+
+    <record id="crm_stage_form" model="ir.ui.view">
+        <field name="name">crm.stage.form</field>
+        <field name="model">crm.stage</field>
+        <field name="inherit_id" ref="crm.crm_stage_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//group/group/field[@name='fold']" position="after">
+                <field name="is_new"/>
+                <field name="estimation_stage"/>
+                <field name="prequalified_stage"/>
+                <field name="qualified_stage"/>
+                <field name="proposition_stage"/>
+                <field name="progress_stage"/>
+                <field name="closed"/>
+            </xpath>
+        </field>
+    </record>
+    <record id="crm_lead_form_inherit" model="ir.ui.view">
+        <field name="name">crm.lead.form.inherited</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <!-- <button name="action_view_bids" type="object" class="oe_stat_button" icon="fa-file-text" invisible="bid_count == 0">
+                    <field name="bid_count" widget="statinfo" string="Bids"/>
+                </button> -->
+                <button name="action_view_expenses" type="object" class="oe_stat_button" icon="fa-list" invisible="expense_count == 0">
+                    <field name="expense_count" widget="statinfo" string="Expenses"/>
+                    <!-- <field name="currency_id" widget="statinfo"/> -->
+                </button>
+                <button name="action_view_checklist_items" type="object" class="oe_stat_button" icon="fa-check-square">
+                    <field name="checklist_completion" widget="percentpie" options="{'readonly': True}"/>
+                </button>
+            </xpath>
+
+            <xpath expr="//group/group[@name='lead_partner']/field[@name='partner_id']" position="attributes">
+                <attribute name="domain">[('is_customer','=',True)]</attribute>
+            </xpath>
+
+            <xpath expr="//group/group[@name='opportunity_partner']/field[@name='partner_id']" position="attributes">
+                <attribute name="domain">[('is_customer','=',True)]</attribute>
+            </xpath>
+
+
+            <xpath expr="//group/group/field[@name='user_company_ids']" position="after">
+                <field name="source_id"/>
+                <field name="require_bid"/>
+                <field name="estimation_stage" invisible="1"/>
+                <field name="qualified_stage" invisible="1"/>
+                <field name="progress_stage" invisible="1"/>
+                <field name="is_new" invisible="1"/>
+                <field name="is_readonly_estimate" invisible="1"/>
+                <field name="sent_for_estimation" invisible="1"/>
+                <field name="estimate_assignee_id" options="{'no_create': True}" readonly="1" force_save="1" domain="[('active', '=', True)]"/>
+            </xpath>
+        
+                <xpath expr="//button[@name='action_sale_quotations_new']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                <xpath expr="//header/button[@name='action_set_won_rainbowman']" position="before">
+                    <button name="action_qualified_stage" type="object" string="Move To Qualified" invisible="is_new == False"/>
+                    <!-- <button name="create_quotation" string="Create Quotation" class="btn-primary" type="object" 
+                        invisible="not (user_id == uid or estimation_stage == False ) "/> -->
+                    <button name="create_quotation" string="Create Quotation" class="btn-primary" type="object" 
+                        invisible="not (can_see_button) "/>
+                    <button name="add_expenses" string="Add Expenses" class="btn-primary" type="object"/>
+                    <button name="open_estimation_wizard" string="Send for Estimation" class="btn-primary" type="object" invisible="sent_for_estimation == True or qualified_stage == False"/>
+                </xpath>
+
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="open_project" type="object" class="oe_stat_button" invisible="project_count == 0" icon="fa-folder">
+                    <field name="project_count" string="Project" widget="statinfo"/>
+                </button>
+            </xpath>
+
+            <xpath expr="//header/field[@name='stage_id']" position="attributes">
+                <attribute name="options">{}</attribute>
+                <!-- <attribute name="options">{'clickable': '0', 'fold_field': 'fold'}</attribute> -->
+            </xpath>
+
+            <xpath expr="//header/button[@name='action_set_won_rainbowman']" position="attributes">
+                <attribute name="invisible">not active or probability == 100 or type == 'lead' or estimation_stage == False</attribute>
+            </xpath>
+
+            <xpath expr="//div/div/field[@name='expected_revenue']" position="attributes">
+                <attribute name="readonly">1</attribute>
+                <attribute name="force_save">1</attribute>
+                <!-- <attribute name="invisible">1</attribute> -->
+            </xpath>
+
+            <xpath expr="//field[@name='tag_ids']" position="after">
+                <field name="is_won" invisible="1"/>
+                <field name="closed" invisible="1"/>
+                <field name="show_product_specifications" invisible="1"/>
+                <field name="project" invisible="1"/>
+                <field name="no_quotation" invisible="1"/>
+                <field name="proposition_stage" invisible="1"/>
+                <field name="project_category_id" required="1"/>
+                <field name="estimation_due_date" readonly="1" force_save="1"/>
+                <field name="date_start" required="0" invisible="is_won ==False"/>
+                <field name="date_end" required="0" invisible="is_won ==False"/>
+            </xpath>
+
+            <xpath expr="//field[@name='tag_ids']" position="attributes">
+                <attribute name="required">1</attribute>
+                <attribute name="options">{'no_create_edit':1,'no_create':1,'no_quick_create':1}</attribute>
+            </xpath>
+            <xpath expr="//notebook" position="attributes">
+                <attribute name="class" >custom_notebook</attribute>
+            </xpath>
+
+            <xpath expr="//notebook/page[@name='internal_notes']" position="before">
+                <page string="Checklist" invisible="show_product_specifications == False">
+                    <field name="checklist_ids" widget="one2many_list" context="{'default_lead_id': id}">
+                        <list editable="bottom">
+                            <field name="name" required="1"/>
+                            <field name="lead_id" column_invisible="1"/>
+                            <field name="is_checked"/>
+                            <field name="checklist_link" required="is_checked" widget="url" />
+                            <field name="percentage" readonly="1" force_save="1"/>
+                        </list>
+                    </field>
+                </page>
+                <page string="Product Specification" invisible="show_product_specifications == False or no_quotation == True">
+                    <!-- <field name="product_specification_ids" widget="one2many" readonly="is_readonly_estimate"> -->
+                    <field name="product_specification_ids" widget="one2many">
+                            <list string="Product Specification" editable="bottom">
+                            <field name="serial_number" placeholder="1.0"/>
+                            <field name="product_id" domain="[('service_tracking', 'in', ['project_only','task_in_project'])]"/>
+                            <field name="description"/>
+                            <field name="uom_id"/>
+                            <field name="site_id" required="parent.is_won"/>
+                            <field name="site_name" required="parent.is_won"/>
+                            <field name="quantity"/>
+                            <field name="price_unit"/>
+                            <field name="price_subtotal" readonly="1"/>
+                            <field name="estimation_id" readonly="1" force_save="1" column_invisible="1"/>
+                            <field name="total_estimated_cost"/>
+                            <field name="total_estimated_cost_withmargin"/>
+                            <button name="action_view_estimate" string="Add/View Estimate" type="object" groups="psi_engineering.group_estimator" class="btn-primary" />
+                        </list>
+                    </field>
+                    <group name="note_group" col="6" class="mt-2 mt-md-0">
+                        <group colspan="4">
+                        </group>
+                        <group class="oe_subtotal_footer" colspan="2" name="amount_total_sp">
+                            <field name="amount_total_product_specification" colspan="2" readonly="1" force_save="1"/>
+                        </group>
+                    </group>
+                </page>
+                <!-- prequalified !=True or qualified_stage != True or proposition_stage!= True or is_new !=False -->
+                <!-- prequalified !=True or qualified_stage != True or proposition_stage!= True or is_new !=False -->
+
+                <page string="Material Costs" invisible="show_product_specifications == False or no_quotation == True or project == False">
+                    <field name="material_costs_ids" widget="one2many" readonly="1">
+                        <list string="Material Costs" editable="bottom">
+                            <field name="product_id" readonly="1"/>
+                            <field name="serial_number"/>
+                            <field name="description" readonly="1"/>
+                            <!-- <field name="task_id" readonly="1"/> -->
+                            <field name="quantity" readonly="1"/>
+                            <field name="uom_id" readonly="1"/>
+                            <field name="unit_price" readonly="1"/>
+                            <field name="currency_id" readonly="1"/>
+                            <field name="total_cost" readonly="1"/>
+                        </list>
+                    </field>
+                    <group class="oe_subtotal_footer" colspan="2">
+                        <field name="amount_total_material_costs" colspan="2" readonly="1"/>
+                        <field name="checklist_completion" colspan="2" readonly="1"/>
+                    </group>
+                </page>
+
+                <page string="Labour Costs" invisible="show_product_specifications == False or no_quotation == True or project == False">
+                    <field name="labour_costs_ids" widget="one2many" readonly="1">
+                        <list string="Labour Costs" editable="bottom">
+                            <field name="serial_number"/>
+                            <field name="description" readonly="1"/>
+                            <field name="product_id"/>
+                            <field name="number_of_people" readonly="1"/>
+                            <field name="rate_per_day" readonly="1"/>
+                            <field name="number_of_days" readonly="1"/>
+                            <field name="total_cost" readonly="1"/>
+                        </list>
+                    </field>
+                    <group class="oe_subtotal_footer" colspan="2">
+                        <field name="amount_total_labour_costs" colspan="2" readonly="1"/>
+                    </group>
+                </page>
+
+                <page string="Overhead Costs" invisible="show_product_specifications == False or no_quotation == True or project == False">
+                    <field name="overhead_costs_ids" widget="one2many" readonly="1">
+                        <list string="Overhead Costs" editable="bottom">
+                            <field name="product_id"/>
+                            <field name="description" readonly="1"/>
+                            <field name="quantity"/>
+                            <field name="amount" readonly="1" string="Unit Cost"/>
+                            <field name="total_overhead_cost" readonly="1"/>
+                        </list>
+                    </field>
+                    <group class="oe_subtotal_footer" colspan="2">
+                        <field name="amount_total_overhead_costs" colspan="2" readonly="1"/>
+                    </group>
+                </page>
+
+                <page string="Equipment Costs" invisible="show_product_specifications == False or no_quotation == True or project == False">
+                    <field name="equipment_cost_ids" widget="one2many" readonly="1" force_save="1">
+                        <list string="Equipment Costs" editable="bottom">
+                            <field name="product_id" options="{'no_create':1,'no_create_edit':1,'no_quick_create':1}"/>
+                            <field name="description" readonly="1"/>
+                            <field name="unit_cost" readonly="0"/>
+                            <field name="quantity" readonly="0"/>
+                            <field name="total_amount" sum="Total Equipment cost" readonly="1"/>
+                        </list>
+                    </field>
+
+                </page>
+
+                <page string=" Total Estimated Costs Summary" invisible="show_product_specifications == False or no_quotation == True or project == False">
+                    <group>
+                        <group>
+                            <field name="amount_total_product_specification" readonly="1" string="Total Product Specification"/>
+                            <field name="amount_total_material_costs" readonly="1" string="Total Material Costs"/>
+                            <field name="amount_total_labour_costs" readonly="1" string="Total Labour Costs"/>
+                            <field name="amount_total_overhead_costs" readonly="1" string="Total Overhead Costs"/>
+                            <field name="total_expense_amount" readonly="1" string="Total Expenses Amount"/>
+                        </group>
+                        <group>
+
+                            <field name="amount_total_estimation_cost" readonly="1" string="Total Estimated Costs"/>
+                        </group>
+                    </group>
+                </page>
+
+                <page name="projects" string="Projects" invisible="project_count == 0 ">
+                    <field name="project_ids" readonly="1" force_save="1"/>
+                </page>
+
+
+            </xpath>
+
+        </field>
+    </record>
+
+    <record id="view_crm_lead_checklist_tree" model="ir.ui.view">
+        <field name="name">crm.lead.checklist.list</field>
+        <field name="model">crm.lead.checklist</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="name"/>
+                <field name="is_checked"/>
+                <field name="percentage"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_estimation_popup_form2" model="ir.ui.view">
+        <field name="name">estimation.popup.form</field>
+        <field name="model">estimation.model</field>
+        <field name="arch" type="xml">
+            <form string="Estimation Details">
+                <sheet>
+                    <field name="name" string="Estimation"/>
+                    <field name="product_specification_id" string="product specification" options="{'no_create': True, 'no_open': True}" required="1"/>
+                    <field name="lead_id" string="Lead id" readonly="1"/>
+
+
+
+                    <group string="Product Information">
+                        <field name="product_id"/>
+                        <field name="item_description"/>
+                        <field name="detailed_description"/>
+                    </group>
+
+
+
+                    <group string="Size and Quantity">
+
+                        <field name="quantity"/>
+                        <field name="uom_id"/>
+                    </group>
+
+                    <group string="Remarks and Attachments">
+                        <field name="remarks"/>
+                        <field name="attachment_ids" widget="many2many_binary"/>
+                    </group>
+
+                    <notebook>
+                        <page string="Material Costs">
+                            <field name="material_costs_ids" widget="one2many" context="{'default_lead_id':lead_id,'default_product_specification_id':product_specification_id}">
+                                <list string="Material Costs" editable="bottom">
+                                    <field name="serial_number"/>
+                                    <field name="product_id"/>
+                                    <field name="description"/>
+                                    <!-- <field name="task_id"/> -->`
+                                    <field name="quantity"/>
+                                    <field name="length"/>
+                                    <field name="width"/>
+                                    <field name="height"/>
+                                    <field name="total_dimension"/>
+                                    <field name="product_specification_id" column_invisible="1" options="{'no_create': True, 'no_open': True}" required="1"/>
+                                    <field name="lead_id" column_invisible="1" />
+                                    <field name="uom_id"/>
+                                    <field name="unit_price"/>
+                                    <field name="currency_id"/>
+                                    <field name="total_cost" readonly="1"/>
+                                </list>
+                            </field>
+                            <group class="oe_subtotal_footer" colspan="2">
+                                <field name="amount_total_material_costs" colspan="2" readonly="1"/>
+                            </group>
+                        </page>
+
+                        <page string="Labour Costs">
+                            <field name="labour_costs_ids" widget="one2many" context="{'default_lead_id':lead_id,'default_product_specification_id':product_specification_id}">
+                                <list string="Labour Costs" editable="bottom">
+                                    <field name="serial_number"/>
+                                    <field name="product_id"/>
+                                    <field name="description"/>
+                                    <field name="product_specification_id" column_invisible="1" options="{'no_create': True, 'no_open': True}" required="1"/>
+                                    <field name="lead_id" column_invisible="1" />
+                                    <field name="number_of_people"/>
+                                    <field name="rate_per_day"/>
+                                    <field name="number_of_days"/>
+                                    <field name="total_cost" readonly="1"/>
+                                </list>
+                            </field>
+                            <group class="oe_subtotal_footer" colspan="2">
+                                <field name="amount_total_labour_costs" colspan="2" readonly="1"/>
+                            </group>
+                        </page>
+
+                        <page string="Overhead Costs">
+                            <field name="overhead_costs_ids" widget="one2many" context="{'default_lead_id':lead_id,'default_product_specification_id':product_specification_id}">
+                                <list string="Overhead Costs" editable="bottom">
+                                    <field name="product_id"/>
+                                    <field name="description"/>
+                                    <field name="quantity"/>
+
+                                    <field name="amount" string="Unit Cost"/>
+                                    <field name="product_specification_id" column_invisible="1" options="{'no_create': True, 'no_open': True}" required="1"/>
+                                    <field name="lead_id" column_invisible="1" />
+                                    <field name="total_overhead_cost" readonly="1"/>
+                                </list>
+                            </field>
+                            <group class="oe_subtotal_footer" colspan="2">
+                                <field name="amount_total_overhead_costs" colspan="2" readonly="1"/>
+                            </group>
+                        </page>
+
+                        <page string="Equipment Costs">
+                            <field name="equipment_cost_ids" widget="one2many" context="{'default_lead_id':lead_id,'default_product_specification_id':product_specification_id}">
+                                <list string="Overhead Costs" editable="bottom">
+                                    <field name="product_specification_id" column_invisible="1" options="{'no_create': True, 'no_open': True}" required="1"/>
+                                    <field name="lead_id" column_invisible="1" />
+                                    <field name="product_id" options="{'no_create':1,'no_create_edit':1,'no_quick_create':1}"/>
+                                    <field name="description" readonly="0"/>
+                                    <field name="unit_cost" readonly="0"/>
+                                    <field name="quantity" readonly="0"/>
+                                    <field name="total_amount" sum="Total Equipment cost" readonly="1"/>
+                                </list>
+                            </field>
+
+                        </page>
+
+                        <page string="Total Estimated Costs Summary">
+
+                            <group>
+                                <group>
+                                    <field name="amount_total_material_costs" readonly="1" string="Total Material Costs"/>
+                                    <field name="amount_total_labour_costs" readonly="1" string="Total Labour Costs"/>
+                                    <field name="amount_total_overhead_costs" readonly="1" string="Total Overhead Costs"/>
+                                    <field name="total_estimated_cost" readonly="1" string="Total Overhead Costs"/>
+                                </group>
+                                <group>
+                                    <field name="amount_total_estimation_cost" readonly="1" string="Total Estimated Costs"/>
+                                </group>
+                            </group>
+
+                            <group>
+                                <group>
+                                    <field name="margin_type" string="Margin Type"/>
+                                    <field name="margin_value" string="Margin Value"/>
+                                </group>
+                                <group>
+                                    <field name="amount_total_with_margin" readonly="1" string="Total with Margin"/>
+                                </group>
+                            </group>
+
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_view_estimation_popup" model="ir.actions.act_window">
+        <field name="name">View Estimation</field>
+        <field name="res_model">estimation.model</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_estimation_popup_form2"/>
+        <field name="target">new</field>
+    </record>
+    <!-- <record id="action_cash_requisition_form" model="ir.actions.act_window">
+        <field name="name">Cash Requisition</field>
+        <field name="res_model">cash.request</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="context">{'default_lead_id': active_id}</field>
+    </record> -->
+</odoo>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="performance_settings_action" model="ir.actions.act_window">
+        <field name="name">Performance Settings</field>
+        <field name="res_model">res.config.settings</field>
+        <field name="view_mode">form</field>
+        <field name="context">{'module' : 'performance'}</field>
+    </record>
+
+    <menuitem id="menu_performance_root" name="Performance Tracking"
+        web_icon="performance_tracking,static/description/performance-tracking.png" sequence="1" />
+    <menuitem id="menu_performance" name="Employee Performance" parent="menu_performance_root"
+        action="action_performance" sequence="1" />
+
+    <menuitem id="performance_settings_menu"
+        name="Configuration"
+        parent="menu_performance_root"
+        sequence="2" />
+
+    <menuitem id="model_performance_settings_menu"
+        name="Modules setting"
+        parent="performance_settings_menu"
+        action="performance_settings_action"
+        sequence="1" />
+</odoo>
+   

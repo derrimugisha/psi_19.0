@@ -1,0 +1,898 @@
+<odoo>
+    <data>
+
+        <record id="account_account_form_inherit_psi" model="ir.ui.view">
+            <field name="name">account.account.form.inherited.psi</field>
+            <field name="model">account.account</field>
+            <field name="inherit_id" ref="account.view_account_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//notebook/page/group/group/field[@name='allowed_journal_ids']" position="after">
+                    <field name="is_transfer_account"/>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="view_project_category_tree" model="ir.ui.view">
+            <field name="name">project.category.list</field>
+            <field name="model">project.category</field>
+            <field name="arch" type="xml">
+                <list>
+                    <field name="name" />
+                    <field name="description" />
+                </list>
+            </field>
+        </record>
+
+        <!-- Form View for Project Categories -->
+        <record id="view_project_category_form" model="ir.ui.view">
+            <field name="name">project.category.form</field>
+            <field name="model">project.category</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <div class="oe_title">
+                            <label string="Name" for="name" />
+                            <h1>
+                                <field name="name" readonly="1" />
+                            </h1>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="description" />
+                            </group>
+                            <group>
+                                <field name="project" />
+                                <field name="no_quotation" />
+                            </group>
+
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_project_category" model="ir.actions.act_window">
+            <field name="name">Project Categories</field>
+            <field name="res_model">project.category</field>
+            <field name="view_mode">list,form</field>
+        </record>
+
+        <!-- Menu Item for Project Categories -->
+        <menuitem id="menu_project_category" name="Project Categories" parent="crm.menu_crm_config_lead" action="action_project_category" sequence="1" />
+
+        <record id="project_simplified_form" model="ir.ui.view">
+            <field name="name">project_simplified.form</field>
+            <field name="model">project.project</field>
+            <field name="inherit_id" ref="project.project_project_view_form_simplified" />
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='user_id']" position="before">
+                    <label for="site_id" />
+                    <field name="site_id" required="1" />
+                    <label for="site_name" />
+                    <field name="site_name" required="1" />
+                    <label for="project_type_id" />
+                    <field name="project_type_id" required="1" />
+                </xpath>
+                <xpath expr="//div/h1/field[@name='name']" position="after">
+                    <field name="project_name" readonly="1" force_save="1" />
+                </xpath>
+                <xpath expr="//div/h1/field[@name='name']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="project_project_tree" model="ir.ui.view">
+            <field name="name">project_project.list</field>
+            <field name="model">project.project</field>
+            <field name="inherit_id" ref="project.view_project" />
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='display_name']" position="after">
+                    <field name="project_name" />
+                    <field name="site_id" />
+                    <field name="site_name" />
+                    <field name="project_type_id" />
+                </xpath>
+            </field>
+        </record>
+
+        <record id="project_project_form_inherit" model="ir.ui.view">
+            <field name="name">project.project.form.inherited</field>
+            <field name="model">project.project</field>
+            <field name="inherit_id" ref="project.edit_project" />
+            <field name="arch" type="xml">
+
+                <xpath expr="//group/group/field[@name='partner_id']" position="after">
+                    <field name="site_id" required="1" />
+                    <field name="site_name" required="1" />
+                    <field name="location_id" required="1" />
+                    <field name="product_specification_id" invisible="1" />
+                    <field name="project_type_id" required="1" />
+                </xpath>
+
+                <xpath expr="//div/h1/field[@name='name']" position="replace">
+                    <field name="project_name" widget="text" readonly="1" force_save="1" class="o_text_overflow" placeholder="e.g. 1245 - Kigejo" />
+                </xpath>
+                <xpath expr="//header" position="inside">
+                    <button name="action_add_milestone" string="Add Milestone" type="object" class="oe_highlight" />
+                    <button name="create_cash_request" invisible="1" type="object" string="Create Cash Requisition" class="oe_highlight" />
+                    <button name="create_item_request" invisible="1" type="object" string="Create Material Requisition" class="oe_highlight" />
+                    <button name="create_purchase_request" invisible="1" type="object" string="Create Purchase Requisition" class="oe_highlight" />
+                    <button name="action_create_purchase_order" type="object" string="Create Purchase Order" class="oe_highlight" />
+                    <button name="create_invoice" invisible="1" type="object" string="Create Invoice" class="oe_highlight" />
+                    <button name="add_expenses" string="Add Expenses" class="btn-primary" type="object"/>
+                </xpath>
+                <xpath expr="//div[@class='oe_button_box']" position="inside">
+                    <button type="object" name="action_view_milestones" icon="fa-list-alt" class="oe_stat_button">
+                        <field name="milestone_count" widget="statinfo" string="Milestones" />
+                    </button>
+                    <button class="oe_stat_button" type="object" invisible="1" name="open_item_requisition" icon="fa-box">
+                        <field string="Material Internal Pickups" name="item_requests_count" widget="statinfo" />
+                    </button>
+                    <button class="oe_stat_button" type="object" invisible="cash_requests_count == 0" name="open_cash_requisition" icon="fa-usd">
+                        <field string="Cash Requisition" name="cash_requests_count" widget="statinfo" />
+                    </button>
+                    <button name="action_view_expenses" type="object" class="oe_stat_button" icon="fa-list" invisible="expense_count == 0">
+                        <field name="expense_count" widget="statinfo" string="Expenses"/>
+                    </button>
+                    <button class="oe_stat_button" type="object" invisible="1" name="open_purchase_requisition" icon="fa-money-bill">
+                        <field string="Purchase Requisition" name="purchase_requests_count" widget="statinfo" />
+                    </button>
+                    <button class="oe_stat_button" type="object" invisible="purchase_count == 0" name="open_purchase" icon="fa-shopping-cart">
+                        <field string="Purchase Orders" name="purchase_count" widget="statinfo" />
+                    </button>
+                    <button name="action_view_purchase_receipts" type="object" invisible="1" class="oe_stat_button" icon="fa-money">
+                        <field name="purchase_receipt_count" widget="statinfo" string="Purchase Receipts" />
+                    </button>
+
+                    <button name="action_view_project_budget" type="object" class="oe_stat_button" invisible="budget_id == False" icon="fa-book">
+                        <span>Budget</span>
+                    </button>
+
+                </xpath>
+                <xpath expr="//notebook/page[@name='description']" position="after">
+
+                    <page name="costs" string="Costs">
+                        <h1>Purchase Orders</h1>
+                        <field name="purchase_orders" readonly="1" />
+                        <group>
+                            <group>
+                                <field name="purchase_total_amount" groups="account.group_account_manager" />
+                            </group>
+                        </group>
+                        <h1>Cash Requisitions</h1>
+                        <!-- domain="[('state', '=', 'done')]" -->
+                        <field name="cash_request_lines" readonly="1">
+                            <list>
+                                <field name="item" />
+                                <field name="description" />
+                                <field name="qty" />
+                                <field name="unit_price" />
+                                <field name="total_price" sum="Total Amount" groups="account.group_account_manager" />
+                            </list>
+                        </field>
+                        <group>
+                            <field name="cash_request_amount" groups="account.group_account_manager" />
+                        </group>
+
+                        <h1>Material Internal Pickups</h1>
+                        <field name="item_request_lines" readonly="1">
+                            <list>
+                                <field name="product_id" options="{'no_create':1,'no_create_edit':1,'no_quick_create':1}" />
+                                <field name="product_qty" />
+                                <field name="product_uom" />
+                                <field name="cost_subtotal" sum="Total Cost" groups="account.group_account_manager" />
+                                <!-- <field name="unit_price"/>
+                          <field name="total_price" sum="Total Amount"/> -->
+                            </list>
+                        </field>
+
+                        <group>
+                            <field name="sale_total_amount" groups="account.group_account_manager" />
+                            <field name="total_actual_cost" groups="account.group_account_manager" />
+                            <field name="total_balance" groups="account.group_account_manager" />
+                        </group>
+                    </page>
+                    <page string="Materials">
+                        <field name="material_ids" readonly="1" force_save="1">
+                            <list editable="bottom">
+                                <field name="product_id" options="{'no_create':1,'no_create_edit':1,'no_quick_create':1}" />
+
+                                <field name="quantity" />
+                                <field name="uom_id" />
+                                <field name="unit_price" />
+                                <field name="currency_id" />
+                                <field name="total_cost" readonly="1" />
+                            </list>
+                            <form string="Material">
+                                <group>
+                                    <field name="product_id" />
+                                    <field name="quantity" />
+                                    <field name="uom_id" />
+                                    <field name="unit_price" />
+                                    <field name="currency_id" />
+                                    <field name="total_cost" readonly="1" />
+                                </group>
+                            </form>
+                        </field>
+                        <group>
+                            <field name="total_material_cost" readonly="1" force_save="1" />
+                        </group>
+                    </page>
+                    <page name="labour costs" string="Labour Costs">
+                        <field name="labour_ids" readonly="1" force_save="1">
+                            <list editable="bottom">
+
+                                <field name="name" />
+                                <!-- <field name="task_id" readonly="1" force_save="1"/> -->
+                                <field name="number_of_people" />
+                                <field name="rate_per_day" />
+                                <field name="number_of_days" />
+                                <field name="total_cost" readonly="1" />
+                            </list>
+                            <form string="Labour">
+                                <group>
+                                    <field name="project_id" readonly="1" invisible="1" />
+                                    <field name="number_of_people" />
+                                    <field name="rate_per_day" />
+                                    <field name="number_of_days" />
+                                    <field name="total_cost" readonly="1" />
+                                </group>
+                            </form>
+                        </field>
+
+                        <group>
+                            <field name="total_labour_cost" readonly="1" />
+                        </group>
+                    </page>
+                    <page name="overhead_costs" string="Overhead Costs">
+                        <!-- List view for the overhead costs associated with the task -->
+                        <field name="overhead_ids" readonly="1" force_save="1">
+                            <list editable="bottom">
+                                <field name="description" />
+                                <field name="quantity" />
+                                <field name="amount" string="Unit Cost" />
+                                <field name="total_overhead_cost" readonly="1" force_save="1" />
+                            </list>
+
+                            <!-- Form view for adding/editing individual overhead cost entries -->
+                            <form string="Overhead Cost">
+                                <group>
+                                    <!-- <field name="task_id" readonly="1" invisible="1" /> -->
+                                    <field name="description" />
+                                    <field name="amount" />
+                                    <field name="total_overhead_cost" readonly="1" />
+                                </group>
+                            </form>
+                        </field>
+
+                        <!-- Displaying the total overhead cost for the task -->
+                        <group>
+                            <field name="total_overhead_cost" readonly="1" />
+                        </group>
+                    </page>
+                    <page string="Equipment Costs">
+                        <field name="equipment_cost_ids">
+                            <list editable="bottom">
+                                <field name="product_id" options="{'no_create':1,'no_create_edit':1,'no_quick_create':1}" />
+                                <field name="description" readonly="1" />
+                                <field name="unit_cost" readonly="0" />
+                                <field name="quantity" readonly="0" />
+                                <field name="total_amount" sum="Total Equipment cost" readonly="1" />
+
+                            </list>
+                        </field>
+                    </page>
+
+
+                </xpath>
+                <xpath expr="//notebook/page/group/group/field[@name='account_id']" position="after">
+                    <field name="budget_id" readonly="1" force_save="1" />
+                    <field name="product_specification_id" invisible="1" force_save="1" />
+                </xpath>
+
+
+            </field>
+        </record>
+
+        <record id="account_move_form" model="ir.ui.view">
+            <field name="name">account_move.form</field>
+            <field name="model">account.move</field>
+            <field name="inherit_id" ref="account.view_move_form" />
+            <field name="arch" type="xml">
+                <xpath expr="//group/group/field[@name='partner_shipping_id']" position="after">
+                    <field name="project_id" readonly="1" force_save="1" />
+                    <field name="accountability_status" widget="statusbar" statusbar_visible="['pending', 'completed']" invisible="move_type not in ('in_receipt','in_invoice')" readonly="1" />
+                    <!-- <field name="is_recurring"/>
+                    <span class="o_form_label" invisible ="is_recurring == False">Frequency:</span>
+                    <field name="recurring_value" nolabel="1" invisible ="is_recurring == False"/>
+                    <field name="recurring_unit" nolabel="1" invisible ="is_recurring == False"/>
+                    <field name="next_bill_date" invisible="is_recurring == False"/> -->
+                    <field name="is_recurring"/>
+                    <span class="o_form_label" invisible ="is_recurring == False">Frequency:</span>
+                    <div class="o_address_format">
+                        <field name="recurring_value" class="o_address_city" required="1" invisible ="is_recurring == False" force_save="1" style="width:30px;"/>
+                        <span style="display:inline;padding-right:4%;" invisible ="is_recurring == False"> - </span>
+                        <field name="recurring_unit" class="o_address_city" required="1" invisible ="is_recurring == False" force_save="1"/>
+                    </div>
+                    <field name="next_bill_date" invisible="is_recurring == False"/>
+                </xpath>
+                <xpath expr="//group/group/div/field[@name='partner_id']" position="attributes">
+                    <attribute name="domain">[('is_vendor','=',True),('company_id','in',(False,
+                        company_id)),('state','in',['done','approved'])]</attribute>
+                </xpath>
+
+                <xpath expr="//notebook/page[@id='other_tab']/group/group[@name='sale_info_group']" position="inside">
+                    <field name="site_id" />
+                    <field name="site_name" />
+                </xpath>
+
+                <xpath expr="//sheet/widget[@name='web_ribbon']" position="after">
+                    <!-- <widget name="web_ribbon" title="Pending" invisible="accountability_status != 'pending' or move_type not in ('in_receipt')" />
+
+                    <widget name="web_ribbon" title="Completed" invisible="accountability_status != 'completed' or move_type not in ('in_receipt')" /> -->
+
+                    <widget name="web_ribbon" title="Pending" invisible="accountability_status != 'pending' or move_type not in ('entry') or not expense_ids" />
+                    <widget name="web_ribbon" title="Completed" invisible="accountability_status != 'completed' or move_type not in ('entry') or not expense_ids" />
+
+                </xpath>
+
+
+
+                <xpath expr="//header/button[@name='action_post']" position="after">
+                    <button name="action_completed" string="Comfirm Accountability" type="object" invisible="accountability_status == 'completed' or move_type not in ['entry','in_invoice','in_receipt']" />
+                </xpath>
+
+                <xpath expr="//field[@name='invoice_line_ids']/list/field[@name='analytic_distribution']" position="attributes">
+                    <attribute name="required">1</attribute>
+                </xpath>
+                <!-- <xpath expr="//group/group/div/field[@name='partner_id']" position="replace">
+                    <field name="partner_domain" invisible="1"/>
+                    <field name="partner_id" widget="res_partner_many2one" domain="partner_domain" nolabel="1" context="{                                             'res_partner_search_mode': (context.get('default_move_type', 'entry') in
+                ('out_invoice', 'out_refund', 'out_receipt') and 'customer') or
+                (context.get('default_move_type', 'entry') in ('in_invoice', 'in_refund',
+                'in_receipt') and 'supplier') or False,                                             'show_address': 1, 'default_is_company':
+                True, 'show_vat': True}" options="{&quot;no_quick_create&quot;: True}" invisible="move_type not in ('out_invoice', 'out_refund', 'in_invoice', 'in_refund',
+                'out_receipt', 'in_receipt')" readonly="state != 'draft'"/>
+
+                </xpath> -->
+            </field>
+        </record>
+
+        <record id="view_order_form_inherit" model="ir.ui.view">
+            <field name="name">sale.order.form.inherit.estimation</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_form" />
+            <field name="arch" type="xml">
+                <xpath expr="//header" position="before">
+                    <field name="opportunity_id" invisible="1" />
+                </xpath>
+                <xpath expr="//notebook" position="inside">
+
+                    <page string="Material Costs" invisible="opportunity_id == False">
+                        <field name="material_cost_ids" readonly="1" force_save="1">
+                            <list>
+                                <field name="product_id" options="{'no_create':1,'no_create_edit':1,'no_quick_create':1}" />
+                                <field name="description" />
+                                <field name="quantity" />
+                                <field name="uom_id" />
+                                <field name="unit_price" />
+                                <field name="total_cost" />
+                            </list>
+                        </field>
+                        <group string="Project Estimation Details">
+                            <group>
+                                <field name="total_material_cost" readonly="1" />
+                                <field name="total_labour_cost" readonly="1" />
+                                <field name="total_specification_cost" readonly="1" />
+                            </group>
+                        </group>
+                    </page>
+                    <page string="Labour Costs" invisible="opportunity_id == False">
+                        <field name="labour_cost_ids" readonly="1" force_save="1">
+                            <list>
+                                <field name="name" />
+                                <field name="number_of_people" />
+                                <field name="rate_per_day" />
+                                <field name="number_of_days" />
+                                <field name="total_cost" />
+                            </list>
+                        </field>
+                    </page>
+                    <page string="Overhead Costs">
+                        <field name="overhead_costs_ids" widget="one2many" readonly="1">
+                            <list string="Overhead Costs" editable="bottom">
+                                <field name="product_id" options="{'no_create':1,'no_create_edit':1,'no_quick_create':1}" />
+                                <field name="description" readonly="1" />
+                                <field name="quantity" />
+                                <field name="amount" readonly="1" />
+                                <field name="total_overhead_cost" readonly="1" />
+                            </list>
+                        </field>
+
+                    </page>
+
+                    <page string="Equipment Costs">
+                        <field name="equipment_cost_ids" widget="one2many" readonly="1" force_save="1">
+                            <list string="Overhead Costs" editable="bottom">
+                                <field name="product_id" options="{'no_create':1,'no_create_edit':1,'no_quick_create':1}" />
+                                <field name="description" readonly="1" />
+                                <field name="unit_cost" readonly="0" />
+                                <field name="quantity" readonly="0" />
+                                <field name="total_amount" sum="Total Equipment cost" readonly="1" />
+                            </list>
+                        </field>
+
+                    </page>
+                    <page string="Product Specifications" invisible="opportunity_id == False">
+                        <field name="product_specification_ids" readonly="1" force_save="1">
+                            <list>
+                                <field name="product_id" options="{'no_create':1,'no_create_edit':1,'no_quick_create':1}" />
+                                <field name="description" />
+                                <field name="quantity" />
+                                <field name="uom_id" />
+                                <field name="price_unit" />
+                                <field name="price_subtotal" />
+                            </list>
+                        </field>
+                    </page>
+                </xpath>
+
+                <xpath expr="//field[@name='order_line']/list/field[@name='product_id']" position="after">
+                    <field name="product_specification_id" column_invisible="1" />
+                </xpath>
+
+                <xpath expr="//notebook/page[@name='other_information']/group/group[@name='sale_info']" position="inside">
+                    <field name="site_id" />
+                    <field name="site_name" />
+                </xpath>
+
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="account_move_line_tree2">
+            <field name="name">account.move.line.tree2</field>
+            <field name="model">account.move.line</field>
+            <field name="inherit_id" ref="account.view_move_line_tree" />
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='account_id']" position="after">
+                    <field name="project_id" />
+                </xpath>
+            </field>
+        </record>
+
+
+        <record id="view_employee_form_inherit" model="ir.ui.view">
+            <field name="name">hr.employee.form.inherit</field>
+            <field name="model">hr.employee</field>
+            <field name="inherit_id" ref="hr.view_employee_form" />
+            <field name="arch" type="xml">
+                <xpath expr="//sheet/group/group" position="inside">      
+                        <field name="location_ids" widget="many2many_tags" placeholder="Select locations"/>
+                </xpath>
+
+                <xpath expr="//notebook" position="inside">
+                    <page string="Account information">
+                        <group string="Account Information">
+                            <field name="journal_id" />
+                            <field name="unreconciled_threshold" />
+                            <field name="amount_unreconciled" />
+                            <field name="amount_reconciled" />
+                            <field name="balance" />
+                        </group>
+                    </page>
+                </xpath>
+
+                <xpath expr="//header" position="inside">
+                    <button name="action_cash_requisition" type="object" string="Cash Requisition" class="btn-primary" icon="fa-money" />
+                </xpath>
+            </field>
+        </record>
+
+        <record id="view_partner_form" model="ir.ui.view">
+            <field name="name">res.partner.form</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_form" />
+            <field name="arch" type="xml">
+                <xpath expr="//form/sheet" position="before">
+                    <header>
+                        <button name="action_submit_for_approval" type="object" string="Submit for Approval" invisible="state != 'draft'" class="oe_highlight" />
+                        <button name="action_approve_vendor" type="object" string="Approve " invisible="state != 'pending_approval'" class="oe_highlight" groups="psi_engineering.group_md" />
+                        <button name="action_reject_vendor" type="object" string="Reject " invisible="state != 'pending_approval'" class="oe_highlight" groups="psi_engineering.group_md" />
+                        <button name="action_draft_vendor" type="object" string="Reset to draft" invisible="state != 'rejected'" class="oe_highlight" />
+                        <field name="state" widget="statusbar" statusbar_visible="draft,pending_approval,approved,rejected" />
+                    </header>
+
+                </xpath>
+
+                <xpath expr="//field[@name='website']" position="after">
+                    <field name="state" invisible="1" />
+                    <field name="partner_type" required="1" />
+                    <field name="contact_reference" readonly="1" force_save="1" />
+                    <field name="id_attachment_ids" invisible="partner_type not in ['vendor', 'both']" widget="many2many_binary"/>
+                </xpath>
+
+                <xpath expr="//notebook" position="inside">
+                    <page name="WHT Details">
+                        <group>
+                            <group>
+                                <field name="wht_status" required="1" />
+                                <field name="wht_certificate_start_date" invisible="wht_status != 'exempt'" required="wht_status == 'exempt'" />
+                                <field name="wht_certificate_end_date" invisible="wht_status != 'exempt'" required="wht_status == 'exempt'" />
+                            </group>
+                            <group>
+                                <field name="attachment_ids" widget="many2many_binary"/>
+                            </group>
+
+                        </group>
+                    </page>
+
+                </xpath>
+
+            </field>
+        </record>
+
+
+        <record id="view_purchase_order_form" model="ir.ui.view">
+            <field name="name">purchase.order.form</field>
+            <field name="model">purchase.order</field>
+            <field name="inherit_id" ref="purchase.purchase_order_form" />
+            <field name="arch" type="xml">
+                <xpath expr="//form/header/button[@id='draft_confirm']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+
+                <xpath expr="//form/header/button[@name='button_confirm']" position="after">
+                    <button name="request_transfer_money" type="object" string="Cash Request" invisible="cash_request_id != False or state in ['done','cancelled','rejected']"/>
+                    <button name="submit_order" type="object" string="Submit Order" class="btn-primary" invisible="state != 'draft'" />
+                </xpath>
+                <xpath expr="//form/header/button[@name='submit_order']" position="after">
+                    <button name="finance_add_funds" type="object" string="Approve" class="btn-primary" invisible="state != 'finance_add_funds'" groups="psi_engineering.group_finance" />
+                </xpath>
+                <xpath expr="//form/header/button[@name='finance_add_funds']" position="after">
+                    <button name="purchase_order" type="object" string="Approve" class="btn-primary" invisible="state != 'md_approval'" groups="psi_engineering.group_md" />
+                </xpath>
+
+                <xpath expr="//form/header/button[@name='submit_order']" position="after">
+                    <button name="reject_order" type="object" string="Reject" class="btn-primary" invisible="state == 'draft' or state == 'rejected' or state == 'purchase' or state == 'done' or state == 'cancel' " groups="psi_engineering.group_md,psi_engineering.group_project_manager,psi_engineering.group_finance,psi_engineering.group_project_cordinator,psi_engineering.group_project_engineer" />
+                </xpath>
+                <xpath expr="//form/header/button[@name='reject_order']" position="after">
+                    <button name="button_draft" type="object" string="Reset to draft" class="btn-primary" invisible="state != 'rejected'" groups="psi_engineering.group_md,psi_engineering.group_project_manager,psi_engineering.group_finance,psi_engineering.group_project_cordinator,psi_engineering.group_project_engineer" />
+                </xpath>
+
+                <xpath expr="//form/header/field[@name='state']" position="replace">
+                    <field name="state" widget="statusbar" statusbar_visible="draft,submitted,finance_add_funds,md_approval,purchase,done,rejected,cancel" />
+                </xpath>
+
+                <xpath expr="//sheet/group/group/field[@name='project_id']" position="after">
+                    <field name="project_manager_id" readonly="0"/>
+                    <field name="budget_id" readonly="state not in ['draft']" domain="[('state','in',['confirmed'])]" />
+                    <field name="task_id" invisible="1"/>
+                    <field name="cash_request_id" readonly="1" invisible="1" force_save="1"/>
+                    <field name="reject_reason" invisible ="state != 'rejected'"/>
+
+                    <!-- readonly="state not in ['submitted', 'draft', 'cancelled']" -->
+                </xpath>
+
+                <xpath expr="//sheet/group/group/field[@name='project_id']" position="attributes">
+                    <attribute name="readonly"> state not in ['draft']</attribute>
+                </xpath>
+
+                <xpath expr="//notebook/page/field[@name='order_line']/list/field[@name='price_unit']" position="attributes">
+                    <attribute name="column_invisible">parent.state not in ['finance_add_funds','md_approval','purchase','done']</attribute>
+                </xpath>
+                <xpath expr="//notebook/page/field[@name='order_line']/list/field[@name='price_subtotal']" position="attributes">
+                    <attribute name="colum_invisible">parent.state not in ['finance_add_funds','md_approval','purchase','done']</attribute>
+                </xpath>
+
+                <xpath expr="//group/group/field[@name='partner_id']" position="attributes">
+                    <attribute name="domain">[('is_vendor','=',True),('company_id','in',(False,
+                        company_id)),('state','in',['done','approved'])]</attribute>
+                </xpath>
+
+                <xpath expr="//notebook/page/field[@name='order_line']/list/field[@name='product_id']" position="attributes">
+                    <attribute name="domain">product_domain</attribute>
+                </xpath>
+
+                <xpath expr="//notebook/page/field[@name='order_line']/list/field[@name='product_id']" position="after">
+                    <field name="budget_id" column_invisible="1"/>
+                    <field name="product_domain" column_invisible="1"/>
+                    <field name="budget_line_id" column_invisible="parent.budget_id == False" domain="[('budget_analytic_id','=',parent.budget_id)]" required="parent.budget_id != False"/>
+                    <field name="show_budget_warning" column_invisible="1"/>
+                </xpath>
+                <xpath expr="//div[@name='button_box']" position="inside">
+                    <button name="view_cash_request" type="object" class="oe_stat_button" invisible="cash_request_id == False" icon="fa-money">
+                        Cash Request
+                    </button>
+                </xpath>
+                <xpath expr="//notebook/page/field[@name='order_line']/list" position="attributes">
+                    <attribute name="decoration-danger"> show_budget_warning == True</attribute>
+                </xpath>
+
+
+            </field>
+        </record>
+
+        <record id="view_partner_tree_inherit_status" model="ir.ui.view">
+            <field name="name">partner.list.inherit.status</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_tree" />
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='user_id']" position="after">
+                    <field name="state" string="Status" optional="show" />
+                </xpath>
+            </field>
+        </record>
+
+        <record id="view_partner_search_inherit_status" model="ir.ui.view">
+            <field name="name">partner.search.inherit.status</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_res_partner_filter" />
+            <field name="arch" type="xml">
+                <search>
+                    <filter name="group_by_status" string="Group by Status" context="{'group_by':'state'}" />
+                </search>
+            </field>
+        </record>
+
+
+        <record id="view_product_template_form_inherit" model="ir.ui.view">
+            <field name="name">product.template.form.inherit.assembly.line</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="product.product_template_only_form_view" />
+            <field name="arch" type="xml">
+                <xpath expr="//page[@name='general_information']" position="after">
+                    <page string="Custom Assembly Lines" invisible="is_assembly_line == False">
+                        <field name="assembly_line_ids" nolabel="1">
+                            <list editable="bottom">
+                                <field name="sequence" />
+                                <field name="component_product_id" column_invisible="1" />
+                                <field name="product_tmpl_id" column_invisible="1" />
+                                <field name="product_id" options="{'no_create':1,'no_create_edit':1,'no_quick_create':1}" />
+                                <field name="product_uom_id" />
+                                <field name="quantity" />
+                                <field name="operation_description" />
+                            </list>
+                        </field>
+                    </page>
+                </xpath>
+                <xpath expr="//form/sheet/div[@name='options']" position="inside">
+                    <span class="d-inline-block">
+                        <field name="is_assembly_line" />
+                        <label for="is_assembly_line" />
+                    </span>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="view_product_assembly_line_tree" model="ir.ui.view">
+            <field name="name">product.assembly.line.list</field>
+            <field name="model">product.assembly.line</field>
+            <field name="arch" type="xml">
+                <list>
+                    <field name="sequence" />
+                    <field name="product_tmpl_id" />
+                    <field name="component_product_id" />
+                    <field name="product_uom_id" />
+                    <field name="quantity" />
+                    <field name="operation_description" />
+                </list>
+            </field>
+        </record>
+
+        <record id="view_product_assembly_line_form" model="ir.ui.view">
+            <field name="name">product.assembly.line.form</field>
+            <field name="model">product.assembly.line</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <group>
+                            <field name="sequence" />
+                            <field name="product_tmpl_id" />
+                            <field name="component_product_id" />
+                            <field name="product_uom_id" />
+                            <field name="quantity" />
+                            <field name="operation_description" />
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+
+        <!-- <record id="bid_form_view_inherit" model="ir.ui.view">
+            <field name="name">bid.form.inherited</field>
+            <field name="model">bid</field>
+            <field name="inherit_id" ref="bids.view_bid_form"/>
+            <field name="arch" type="xml">
+                
+                <xpath expr="//field[@name='account_manager']" position="after">
+                    <field name="lead_id"/>
+                </xpath>
+            </field>
+        </record> -->
+
+
+
+
+        <record id="view_tax_form" model="ir.ui.view">
+            <field name="name">account.tax.form</field>
+            <field name="model">account.tax</field>
+            <field name="priority">1</field>
+            <field name="arch" type="xml">
+                <form string="Account Tax">
+                    <field name="company_id" invisible="1"/>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="name"/>
+                                <field name="amount_type"/>
+                                <field name="active" widget="boolean_toggle"/>
+                                <field name="is_wht" invisible="0" />
+                                <field name="account_id" invisible="is_wht == False" required="is_wht == True" />
+                            </group>
+                            <group>
+                                <field name="is_used" invisible="1"/>
+                                <field name="type_tax_use"/>
+                                <field name="tax_scope"/>
+                                <label for="amount" invisible="amount_type not in ('fixed', 'percent', 'division')"/>
+                                <div invisible="amount_type not in ('fixed', 'percent', 'division')">
+                                    <field name="amount" class="oe_inline" nolabel="1"/>
+                                    <span class="o_form_label oe_inline" invisible="amount_type == 'fixed'">%</span>
+                                </div>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Definition" name="definition">
+                                <div invisible="amount_type == 'group'">
+                                    <field name="country_code" invisible="1"/>
+                                    <group string="Distribution for Invoices" class="mw-100">
+                                        <field name="invoice_repartition_line_ids" nolabel="1"/>
+                                    </group>
+                                    <group string="Distribution for Refunds" class="mw-100">
+                                        <field name="refund_repartition_line_ids" nolabel="1"/>
+                                    </group>
+                                </div>
+                                <field name="children_tax_ids" invisible="amount_type != 'group' or type_tax_use == 'none'" domain="[('type_tax_use','in',('none',type_tax_use)), ('amount_type','!=','group')]">
+                                    <list string="Children Taxes">
+                                        <field name="sequence" widget="handle"/>
+                                        <field name="name"/>
+                                        <field name="amount_type"/>
+                                        <field name="amount"/>
+                                    </list>
+                                </field>
+                            </page>
+                            <page string="Advanced Options" name="advanced_options">
+                                <group>
+                                    <group>
+                                        <field name="invoice_label" invisible="amount_type == 'group'"/>
+                                        <field name="description"/>
+                                        <field name="tax_group_id" invisible="amount_type == 'group'" required="amount_type != 'group'"/>
+                                        <field name="analytic" invisible="amount_type == 'group'" groups="analytic.group_analytic_accounting" />
+                                        <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company"/>
+                                        <field name="country_id" required="True"/>
+                                        <field name="invoice_legal_notes"/>
+                                    </group>
+                                    <group name="advanced_booleans">
+                                        <field name="price_include" invisible="1"/>
+                                        <field name="price_include_override" invisible="amount_type == 'group'" placeholder="Default" />
+                                        <field name="include_base_amount" invisible="amount_type == 'group'"/>
+                                        <field name="is_base_affected" invisible="amount_type == 'group' or price_include" groups="base.group_no_one"/>
+                                        <field name="hide_tax_exigibility" invisible="1"/>
+                                        <field name="tax_exigibility" widget="radio" invisible="amount_type == 'group' or not hide_tax_exigibility" groups="account.group_account_readonly"/>
+                                        <field name="cash_basis_transition_account_id" options="{'no_create': True}" invisible="tax_exigibility == 'on_invoice'" required="tax_exigibility == 'on_payment'" groups="account.group_account_readonly"/>
+                                    </group>
+                                </group>
+                            </page>
+                        </notebook>
+                    </sheet>
+                    <chatter/>
+                </form>
+            </field>
+        </record>
+
+        <!-- <record id="account_tax_form2" model="ir.ui.view">
+            <field name="name">account_tax.form</field>
+            <field name="model">account.tax</field>
+            <field name="inherit_id" ref="psi_engineering.view_tax_form" />
+            <field name="arch" type="xml">
+                <xpath expr="//group/group/field[@name='active']" position="after">
+                    <field name="is_wht" invisible="0" />
+                    <field name="account_id" invisible="is_wht == False" required="is_wht == True" />
+                </xpath>
+            </field>
+        </record> -->
+
+
+        <record id="project_kanban_view" model="ir.ui.view">
+            <field name="name">project_kanban_view</field>
+            <field name="model">project.project</field>
+            <field name="inherit_id" ref="project.view_project_kanban" />
+            <field name="arch" type="xml">
+                <xpath expr="//kanban" position="attributes">
+                    <attribute name="action">action_view_project</attribute>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="expense_custom_sequence" model="ir.sequence">
+            <field name="name">Expense Sequence</field>
+            <field name="code">hr.expense.custom.sequence</field>
+            <field name="prefix">EXP/%(year)s/%(month)s/</field>            <!-- Outputs EXP/2025/02/ -->
+            <field name="padding">3</field>            <!-- Ensures 001, 002, etc. -->
+            <field name="number_increment">1</field>
+            <field name="number_next">1</field>            <!-- Starts at 001 -->
+            <field name="use_date_range" eval="True"/>
+            <!-- Enables monthly reset -->
+                       <!-- Resets sequence monthly -->
+        </record>
+
+        <record id="hr_expense_form" model="ir.ui.view">
+            <field name="name">hr_expense.form</field>
+            <field name="model">hr.expense</field>
+            <field name="inherit_id" ref="hr_expense.hr_expense_view_form" />
+            <field name="arch" type="xml">
+
+                <xpath expr="//form/sheet/group/group/div/field[@name='product_id']" position="attributes">
+                    <attribute name="domain">product_domain</attribute>
+                </xpath> 
+                <xpath expr="//group/group/field[@name='company_id']" position="after">
+                    <field name="lead_id" invisible="1"/>
+                    <field name="project_id" />
+                    <field name="budget_id"/>
+                    <!-- <field name="product_domain" invisible="1"/> -->
+                    <field name="budget_line_id"/>
+                </xpath>
+                <xpath expr="//sheet/div[@class='oe_title']/label[@for='name']" position='before'>
+                    <h1>
+                        <field name="custom_sequence" placeholder="e.g. Lunch with Customer" readonly="1"/>
+                    </h1>
+                </xpath>
+
+                <xpath expr="//header/button[@name='action_approve']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                <xpath expr="//header/button[@name='action_approve']" position="after">
+                    <button name="submit_md_approval" type="object" string="Approve" class="btn-primary" invisible="state != 'submitted'"/>
+                    <button name="btn_md_approval" type="object" string="Approve" class="btn-primary" invisible="state != 'md_approval'" groups="psi_engineering.group_md"/>
+                </xpath>
+
+                <xpath expr="//header/button[@name='action_refuse']" position="attributes">
+                    <attribute name="string">Reject</attribute>
+                </xpath>
+
+                <xpath expr="//header/field[@name='state']" position="replace">
+                    <field name="state" widget="statusbar" statusbar_visible="draft,submitted,md_approval,approved,reported"/>
+                </xpath>
+            </field>
+        </record>
+
+
+
+        <record id="hr_expense_tree" model="ir.ui.view">
+            <field name="name">hr.expense.tree</field>
+            <field name="model">hr.expense</field>
+            <field name="inherit_id" ref="hr_expense.hr_expense_view_expenses_analysis_tree" />
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='company_id']" position="before">
+                    <field name="custom_sequence"/>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="view_account_asset_form_inherit" model="ir.ui.view">
+            <field name="name">account.asset.form.inherit</field>
+            <field name="model">account.asset</field>
+            <field name="inherit_id" ref="account_asset.view_account_asset_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='already_depreciated_amount_import']" position="after">
+                    <field name="employee_id"/>
+                </xpath>
+            </field>
+        </record>
+
+
+    </data>
+
+
+</odoo>
